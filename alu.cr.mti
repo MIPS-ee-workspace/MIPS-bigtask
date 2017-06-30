@@ -1,0 +1,29 @@
+F:/codes/modelsim/ALU/ALU_logic.v {1 {vlog -work work -vopt -stats=none F:/codes/modelsim/ALU/ALU_logic.v
+Model Technology ModelSim SE-64 vlog 10.4 Compiler 2014.12 Dec  3 2014
+-- Compiling module ALU_logic
+
+Top level modules:
+	ALU_logic
+
+} {} {}} F:/codes/modelsim/ALU/ALU_shift.v {1 {vlog -work work -vopt -stats=none F:/codes/modelsim/ALU/ALU_shift.v
+Model Technology ModelSim SE-64 vlog 10.4 Compiler 2014.12 Dec  3 2014
+-- Compiling module ALU_shift
+
+Top level modules:
+	ALU_shift
+
+} {} {}} F:/codes/modelsim/ALU/ALU_tb.v {1 {vlog -work work -vopt -stats=none F:/codes/modelsim/ALU/ALU_tb.v
+Model Technology ModelSim SE-64 vlog 10.4 Compiler 2014.12 Dec  3 2014
+-- Compiling module ALU_tb
+
+Top level modules:
+	ALU_tb
+
+} {} {}} F:/codes/modelsim/ALU/ALU_cmp.v {1 {vlog -work work -vopt -stats=none F:/codes/modelsim/ALU/ALU_cmp.v
+Model Technology ModelSim SE-64 vlog 10.4 Compiler 2014.12 Dec  3 2014
+-- Compiling module ALU_cmp
+
+Top level modules:
+	ALU_cmp
+
+} {} {}}

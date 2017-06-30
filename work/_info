@@ -1,0 +1,341 @@
+m255
+K4
+z2
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+dD:/anzhuang/modelsim/examples
+vALU
+Z0 !s110 1498813608
+!i10b 1
+!s100 URd@nG@KYhDKOGz1WAUf>1
+I_@17[Q[Z;>e`kBe]AB5aW3
+Z1 VDg1SIo80bB@j0V0VzS_@n1
+Z2 dF:/codes/modelsim/ALU
+w1498813599
+8F:/codes/modelsim/ALU/ALU.v
+FF:/codes/modelsim/ALU/ALU.v
+L0 1
+Z3 OL;L;10.4;61
+r1
+!s85 0
+31
+!s108 1498813608.645000
+!s107 F:/codes/modelsim/ALU/ALU.v|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/ALU/ALU.v|
+!i113 0
+Z4 o-work work -L mtiAvm -L mtiRnm -L mtiOvm -L mtiUvm -L mtiUPF -L infact
+n@a@l@u
+vALU_adder
+R0
+!i10b 1
+!s100 ^ffVYNV4T:ZFXiR0_KLTK1
+Ij;edH<BcZHlACj:6>@>j;0
+R1
+R2
+w1498813396
+8F:/codes/modelsim/ALU/ALU_adder.v
+FF:/codes/modelsim/ALU/ALU_adder.v
+L0 1
+R3
+r1
+!s85 0
+31
+!s108 1498813608.161000
+!s107 F:/codes/modelsim/ALU/ALU_adder.v|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/ALU/ALU_adder.v|
+!i113 0
+R4
+n@a@l@u_adder
+vALU_cmp
+R0
+!i10b 1
+!s100 dM9X[96:iKHcj;0:PVlg12
+IiXQdUZdIGDG`@0L@nlZDm2
+R1
+R2
+w1498711466
+8F:/codes/modelsim/ALU/ALU_cmp.v
+FF:/codes/modelsim/ALU/ALU_cmp.v
+L0 1
+R3
+r1
+!s85 0
+31
+!s108 1498813608.240000
+!s107 F:/codes/modelsim/ALU/ALU_cmp.v|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/ALU/ALU_cmp.v|
+!i113 0
+R4
+n@a@l@u_cmp
+vALU_cmp_tb
+R1
+r1
+!s85 0
+31
+!i10b 1
+!s100 4z]Q1RWH_Xl29B]d28Tf]2
+I8Ka70MMVU<5A2jgDQG`D30
+R2
+w1498666710
+8F:/codes/modelsim/ALU/ALU_cmp_tb.v
+FF:/codes/modelsim/ALU/ALU_cmp_tb.v
+L0 1
+R3
+!s108 1498666721.593000
+!s107 F:/codes/modelsim/ALU/ALU_cmp_tb.v|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/ALU/ALU_cmp_tb.v|
+!i113 0
+R4
+n@a@l@u_cmp_tb
+vALU_logic
+R0
+!i10b 1
+!s100 I=k??N1^=>BZ1@BUIm8Tm2
+IB6e[XkzNf[^iW=Ll4lTOS1
+R1
+R2
+w1498660253
+Z5 8F:/codes/modelsim/ALU/ALU_logic.v
+Z6 FF:/codes/modelsim/ALU/ALU_logic.v
+L0 1
+R3
+r1
+!s85 0
+31
+!s108 1498813608.459000
+Z7 !s107 F:/codes/modelsim/ALU/ALU_logic.v|
+Z8 !s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/ALU/ALU_logic.v|
+!i113 0
+R4
+n@a@l@u_logic
+vALU_logic_tb
+!s110 1498709925
+!i10b 1
+!s100 ;Uz?VS_LdAmJWAEOH^Cj^3
+I=U0QX;3B0T=bcG7jdhZ4A3
+R1
+R2
+w1498709921
+Z9 8F:/codes/modelsim/ALU/ALU_tb.v
+Z10 FF:/codes/modelsim/ALU/ALU_tb.v
+L0 2
+R3
+r1
+!s85 0
+31
+!s108 1498709925.744000
+Z11 !s107 F:/codes/modelsim/ALU/ALU_tb.v|
+Z12 !s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/ALU/ALU_tb.v|
+!i113 0
+R4
+n@a@l@u_logic_tb
+vALU_logicmodule
+!s110 1498660180
+!i10b 1
+!s100 ]>J[eXi6KTcZae9O78OeQ0
+IFkBLAi[M]28nD;C<oR7lH1
+R1
+R2
+w1498660176
+R5
+R6
+L0 1
+R3
+r1
+!s85 0
+31
+!s108 1498660180.324000
+R7
+R8
+!i113 0
+R4
+n@a@l@u_logicmodule
+vALU_shift
+R0
+!i10b 1
+!s100 fJIjd3MVhF[`FV1o@0^ni2
+IRC:1UE9DXfo2OlFNja[g?3
+R1
+R2
+w1498662815
+8F:/codes/modelsim/ALU/ALU_shift.v
+FF:/codes/modelsim/ALU/ALU_shift.v
+L0 1
+R3
+r1
+!s85 0
+31
+!s108 1498813608.546000
+!s107 F:/codes/modelsim/ALU/ALU_shift.v|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/ALU/ALU_shift.v|
+!i113 0
+R4
+n@a@l@u_shift
+vALU_shift_tb
+R1
+r1
+!s85 0
+31
+!i10b 1
+!s100 QgSFAn]I`FoHel6Y@6]`X2
+I_SAC_R]@7ChAKNjB6GhNB0
+R2
+w1498664102
+8F:/codes/modelsim/ALU/ALU_shift_tb.v
+FF:/codes/modelsim/ALU/ALU_shift_tb.v
+L0 1
+R3
+!s108 1498664116.098000
+!s107 F:/codes/modelsim/ALU/ALU_shift_tb.v|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/ALU/ALU_shift_tb.v|
+!i113 0
+R4
+n@a@l@u_shift_tb
+vALU_tb
+R0
+!i10b 1
+!s100 2>Z:`bK50kn`5coE_N3bh1
+IZY_mZJPFZl1GVg<2I0mz<3
+R1
+R2
+w1498711772
+R9
+R10
+L0 2
+R3
+r1
+!s85 0
+31
+!s108 1498813608.365000
+R11
+R12
+!i113 0
+R4
+n@a@l@u_tb
+vDataMem
+!s110 1498810149
+!i10b 1
+!s100 e`od@mPgGccf79[3<a2AN0
+Ildh4QOCMWQHjUiI8D:n;T2
+R1
+R2
+w1464166457
+8F:/codes/modelsim/DataMem.v
+FF:/codes/modelsim/DataMem.v
+L0 3
+R3
+r1
+!s85 0
+31
+!s108 1498810149.407000
+!s107 F:/codes/modelsim/DataMem.v|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/DataMem.v|
+!i113 0
+R4
+n@data@mem
+vPeripheral
+R0
+!i10b 1
+!s100 Zoh9HJZ^AV:2fHi:Xj]P_3
+I`D?ELdmHTFR1JL?DZ7NaC3
+R1
+R2
+w1340879366
+8F:/codes/modelsim/Peripheral.v
+FF:/codes/modelsim/Peripheral.v
+L0 3
+R3
+r1
+!s85 0
+31
+!s108 1498813608.809000
+!s107 F:/codes/modelsim/Peripheral.v|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/Peripheral.v|
+!i113 0
+R4
+n@peripheral
+vRegFile
+R0
+!i10b 1
+!s100 ?;:DzGG@T]mBYY69NfobG0
+ICcRD:SZImJH81Z4Me6b7:2
+R1
+R2
+w1498806761
+8F:/codes/modelsim/regfile.v
+FF:/codes/modelsim/regfile.v
+L0 3
+R3
+r1
+!s85 0
+31
+!s108 1498813608.971000
+!s107 F:/codes/modelsim/regfile.v|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/regfile.v|
+!i113 0
+R4
+n@reg@file
+vROM
+Z13 !s110 1498813609
+!i10b 1
+!s100 Hg5JkUL2;HP1e3j=HkFaN0
+I6imW_Mf:]fYih2QW:5=3P3
+R1
+R2
+w1498812812
+8F:/codes/modelsim/rom.v
+FF:/codes/modelsim/rom.v
+L0 3
+R3
+r1
+!s85 0
+31
+!s108 1498813609.070000
+!s107 F:/codes/modelsim/rom.v|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/rom.v|
+!i113 0
+R4
+n@r@o@m
+vtb
+R1
+r1
+!s85 0
+31
+!i10b 1
+!s100 RA[=B>emZ_bOEYm@nHeCQ2
+IN=GNV`hnNi^1N@eDnhaZS3
+R2
+w1498657898
+8F:/codes/modelsim/ALU/tb.V
+FF:/codes/modelsim/ALU/tb.V
+L0 2
+R3
+!s108 1498657902.835000
+!s107 F:/codes/modelsim/ALU/tb.V|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/ALU/tb.V|
+!i113 0
+R4
+vtop
+R13
+!i10b 1
+!s100 OXf6kTV]bicV8^o;N_oXQ1
+IjHOb71c6<l96gnJa9V4:F2
+R1
+R2
+w1498812878
+8F:/codes/modelsim/ALU/processor.v
+FF:/codes/modelsim/ALU/processor.v
+L0 3
+R3
+r1
+!s85 0
+31
+!s108 1498813609.250000
+!s107 F:/codes/modelsim/ALU/processor.v|
+!s90 -reportprogress|300|-work|work|-vopt|-stats=none|F:/codes/modelsim/ALU/processor.v|
+!i113 0
+R4

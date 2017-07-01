@@ -6,6 +6,13 @@
 from dict_data import *
 from re import split as resplit
 
+def is_number(string):
+    try:
+        int(string, 16)
+        return True
+    except ValueError:
+        return False
+
 def ReadInstLn():
     line =  resplit(',|\s|\(|\)', input())
     return [w for w in line if w]
@@ -92,12 +99,12 @@ while(True):
 for i in range(0, inst_cnt):
     # Deals with label, convert to binary
     if('imm' in parsed_inst[i]):
-        if(not parsed_inst[i]['imm'].isnumeric()):
+        if(not is_number(parsed_inst[i]['imm'])):
             parsed_inst[i]['imm'] = str(label_dict[parsed_inst[i]['imm']] - i - 1)
 
     else:
         if('target' in parsed_inst[i]):
-            if(not parsed_inst[i]['target'].isnumeric()):
+            if(not is_number(parsed_inst[i]['target'])):
                 parsed_inst[i]['target'] = \
                     str(InstCntToAddr(label_dict[parsed_inst[i]['target']]))
 

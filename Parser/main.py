@@ -93,7 +93,7 @@ for i in range(0, inst_cnt):
     # Deals with label, convert to binary
     if('imm' in parsed_inst[i]):
         if(not parsed_inst[i]['imm'].isnumeric()):
-            parsed_inst[i]['imm'] = str(label_dict[parsed_inst[i]['imm']] - i)
+            parsed_inst[i]['imm'] = str(label_dict[parsed_inst[i]['imm']] - i - 1)
 
     else:
         if('target' in parsed_inst[i]):

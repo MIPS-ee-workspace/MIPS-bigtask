@@ -1,12 +1,12 @@
 `timescale 1ns/1ps
 
-module RegFile (reset,clk,PC_next,addr1,data1,addr2,data2,wr,addr3,data3);
+module RegFile (reset,clk,addr1,data1,addr2,data2,wr,addr3,data3, uart);
 input reset,clk;
 input wr;
-input [31:0] PC_next;
 input [4:0] addr1,addr2,addr3;
 output [31:0] data1,data2;
 input [31:0] data3;
+input timer,uart;
 
 reg [31:0] RF_DATA[31:1];
 integer i;
@@ -20,7 +20,9 @@ always@(negedge reset or posedge clk) begin
 	end
 	else begin
 		if(wr && addr3) RF_DATA[addr3] <= data3;
-		if(PC_next[31]==0) RF_DATA[26] <= PC_next;
+
+		RF_DATA[27][0]<=(uart==1)?1:0;
+
 	end
 end
 endmodule

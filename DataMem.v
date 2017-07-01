@@ -1,6 +1,6 @@
 `timescale 1ns/1ps
 
-module DataMem (reset,clk,rd,wr,addr,wdata,rdata,overflow);
+module DataMem (reset,clk,rd,wr,addr,wdata,rdata);
 input reset,clk;
 input rd,wr;
 input [31:0] addr;	//Address Must be Word Aligned
@@ -15,15 +15,6 @@ assign rdata=(rd && (addr < RAM_SIZE))?RAMDATA[addr[31:2]]:32'b0;
 
 always@(posedge clk) begin
 	if(wr && (addr < RAM_SIZE)) RAMDATA[addr[31:2]]<=wdata;
-end
-
-always@(posedge clk) begin
-	if(addr >= RAM_SIZE) begin
-		overflow=1;
-	end
-	else begin
-		overflow=0;
-	end
 end
 
 endmodule

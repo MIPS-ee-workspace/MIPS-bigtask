@@ -1,34 +1,25 @@
-module CPU_Control(Instruct,IRQ,JT,Imm16,Shamt,Rd,Rt,Rs,
-                   PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,
+module CPU_Control(Instruct,IRQ,Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,
                    Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
 
 input[31:0] Instruct;
 input IRQ,PC_high;//PC[31]
-output[25:0] JT;
-output[15:0] Imm16;
-output[4:0] Shamt, Rd, Rt, Rs;
+input Interrupt,Exception;
 output[2:0] PCSrc;
 output[1:0] RegDst, MemToReg;
 output[5:0] ALUFun;
 output RegWr,ALUSrc1,ALUSrc2,Sign,MemWr,MemRd,EXTOp,LUOp;
 wire[5:0] opcode;
-wire Branch;
+wire Branch,I;
 
 //部分指令直接翻译控制信号
 assign opcode=Instruct[31:26];
-assign Rs=Instruct[25:21]; 
-assign Rt=Instruct[20:16];
-assign Rd=Instruct[15:11];
-assign Shamt=Instruct[10:6];
 assign Funct=Instruct[5:0];
-assign Imm16=Instruct[15:0];
-assign JT=Instruct[25:0];
+assign I=(opcode==6'hf||opcode==6'h8||opcode==6'h9||opcode==6'hc||opcode==6'ha||opcode==6'hb);//判断是否是I型指令
 
-
-assign PCSrc[0]=(Branch||(opcode==6'h0&&Funct==6'h8)||XADR);
-assign PCSrc[1]=(opcode==6'h3)|(opcode==6'h0&&Funct==6'h8);
-assign PCSrc[2]=(~PC_high&IRQ)|XADR;
-
+assign PCSrc[0]=(Branch||(opcode==6'h0&&Funct==6'h8)||(opcode==6'h0&&Funct==6'h9));//分支,jr,jalr
+assign PCSrc[1]=(opcode==6'h2||opcode==6'h3||(opcode==6'h0&&Funct==6'h8)||(opcode==6'h0&&Funct==6'h9));	//j,jal,jr,jalr
+assign RegDst[0]=(Interrupt||Exception||I);//中断，异常，I型
+assign RegDst[1]=(Interrupt||Exception||opcode==6'h3||(opcode==6'h0&&Funct==6'h9));//中断,异常,jal,jalr
 
 assign Branch=(opcode==6'h1||opcode==6'h4||opcode==6'h5||opcode==6'h6||opcode==6'h7)?1:0;
 assign RegWrite=(opcode==6'h2b||opcode==6'h04||opcode==6'h02||(opcode==6'b0&&Funct==6'h08))?0:1;

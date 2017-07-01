@@ -80,13 +80,14 @@ parsed_inst = []
 bin_out = []
 while(True):
     inst_line = ReadInstLn()
-    if(inst_line[0] == 'END'):
-        break
-    if(inst_line[0][-1] == ':'):   # label line
-        label_dict[inst_line[0][:-1]] = inst_cnt
-    else:
-        parsed_inst.append(ParseInst(inst_line))
-        inst_cnt += 1
+    if(inst_line):
+        if(inst_line[0] == 'END'):
+            break
+        if(inst_line[0][-1] == ':'):   # label line
+            label_dict[inst_line[0][:-1]] = inst_cnt
+        else:
+            parsed_inst.append(ParseInst(inst_line))
+            inst_cnt += 1
 
 for i in range(0, inst_cnt):
     # Deals with label, convert to binary

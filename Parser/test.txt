@@ -1,0 +1,4 @@
+haha:
+j haha
+beq $0, $zero, haha
+END

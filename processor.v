@@ -5,20 +5,29 @@ module top();
 
 endmodule
 
-module Processor(reset,clk,led,switch,digi);
-input reset,clk;
+module Processor(sysclk,clk,led,switch,digi,UART_RX,UART_TX);
 
-reg[31:0] condition;
+//set switch link
+
+input clk,sysclk,UART_RX;
+output [7:0] led;
+input [7:0] switch;
+output [11:0] digi;
+output UART_TX;
+
+wire reset;
+assign reset=switch[0];
+//
 
 //Interrupt,Exception
 wire Interrupt,Exception;
 
-wire irq,uart;
-assign Interrupt=irq || uart;
+wire timer,uart_send;
+assign Interrupt=timer || uart_send;
 
 reg core_hazard;
-wire PC_overflow,data_overflow;
-assign Exception=core_hazard || PC_overflow || data_overflow;
+wire PC_overflow,ALU_overflow;
+assign Exception=core_hazard || PC_overflow || ALU_overflow;
 //
 
 //PC, core_hazard
@@ -62,17 +71,20 @@ wire[15:0] Imm16;
 assign Imm16[15:0]=Instruction[15:0];
 
 wire[31:0] JT;
-assign JT[1:0]=2'b00;
-assign JT[27:2]=Instruction[25:0];
-assign JT[31:28]=PC4[31:28];
+assign JT={PC4[31:28],Instruction[25:0],2'b00};
 //
 
-//control
+//control, Inte,Exce,zero,nega
+wire zero,negative;
+
 wire[1:0] PCSrc;
 wire[1:0] RegDst;
 wire[1:0] MemToReg;
 wire[5:0] ALUFun;
 wire RegWr,ALUSrc1,ALUSrc2,Sign,MemWr,MemRd,EXTOp,LUOp;
+
+//.........
+
 //
 
 //Register File
@@ -90,7 +102,7 @@ begin
 	endcase
 end
 
-RegFile register_file(reset,clk,PC_next,Rs,DatabusA,Rt,DatabusB,RegWr,AddrC,DatabusC);
+RegFile register_file(reset,clk,Rs,DatabusA,Rt,DatabusB,RegWr,AddrC,DatabusC, uart);
 //
 
 //ALU
@@ -107,16 +119,24 @@ assign ImmExt=(EXTOp && Imm16[15])?{16'hffff,Imm16}:{16'h0000,Imm16};
 assign Imm32=(LUOp)?{Imm16,16'h0000}:ImmExt;
 assign ALUIn2=(ALUSrc2)?Imm32:DatabusB;
 
-ALU ALU_mod(ALUIn1,ALUIn2,ALUFun,Sign,ALUOut);
+ALU ALU_mod(ALUIn1,ALUIn2,ALUFun,Sign,ALUOut,zero,negative,ALU_overflow);
 
 assign Offset={ImmExt[29:0],2'b00};
 assign ConBA=Offset+PC4;
 //
 
 //Data Memory
+wire[31:0] rdata1;
+wire[31:0] rdata2;
 wire[31:0] ReadData;
+wire MemRd1,MemRd2,MemWr1,MemWr2;
 
-DataMem data_memory(reset,clk,MemRd,MemWr,ALUOut,DatabusB,ReadData,data_overflow);
+{MemRd1,MemRd2,MemWr1,MemWr2}=(ALUOut<32'h40000000)?{MemRd,0,MemWr,0}:{0,MemRd,0,MemWr};
+
+Peripheral peripheral(reset,sysclk,clk,MemRd1,MemWr1,ALUOut,DatabusB,rdata1, led,switch,digi,timer, UART_RX,UART_TX,uart_send);
+DataMem data_memory(reset,clk,MemRd2,MemWr2,ALUOut,DatabusB,rdata2);
+
+assign ReadData= rdata1 | rdata2;
 
 always@(*)
 begin

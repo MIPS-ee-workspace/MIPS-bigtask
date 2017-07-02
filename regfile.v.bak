@@ -6,7 +6,7 @@ input wr;
 input [4:0] addr1,addr2,addr3;
 output [31:0] data1,data2;
 input [31:0] data3;
-input uart;
+input timer,uart;
 
 reg [31:0] RF_DATA[31:1];
 integer i;

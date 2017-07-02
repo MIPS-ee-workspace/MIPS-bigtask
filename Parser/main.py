@@ -1,7 +1,7 @@
 # MIPS Parser supporting a subset of instructions
 # Consult documentation for instructions supported.
 # Pseudocode is not implemented currently. 
-# Python 3.5+ needed.
+# Python 3.5+ needed. 
 
 from dict_data import *
 from re import split as resplit
@@ -23,11 +23,11 @@ def FillZeroLeft(num_str, min_len):
 def InstCntToAddr(n):
     return n
 
-# def BinToHex(bin_str):
-#     ans = ''
-#     for i in range(0, len(bin_str), 4):
-#         ans += hex(int(bin_str[i: i + 4]), 2)[2:]
-#     return ans
+def BinToHex(bin_str):
+    ans = ''
+    for i in range(0, len(bin_str), 4):
+        ans += hex(int(bin_str[i: i + 4], 2))[2:]
+    return ans
 
 def NumToBin(num_str):
     if(num_str[:2] == '0x'): # hex
@@ -48,12 +48,10 @@ def RegnameToNum(regname):
             return regnum_dict[regname[:-1]] + int(regname[-1])
         if regname[0] == 's':
             return regnum_dict['fp']    # $s8 is equivalent to $fp
-        return ['24', '25'][regname[-1] == '9'] # $t8, $t9
+        return [24, 25][regname[-1] == '9'] # $t8, $t9
 
     return regnum_dict[regname]
 
-
-# def ParseInst(inst_line, inst_cnt, label_dict):
 def ParseInst(inst_line):
     op_name = inst_line[0]
     syntax = inst_syntax_dict[op_parse_dict[op_name]['type']]
@@ -111,4 +109,4 @@ for i in range(0, inst_cnt):
     bin_out.append(ConvertToBin(parsed_inst[i]))
 
 for i in range(0, inst_cnt):
-    print(bin_out[i])
+    print('ROM_DATA[%d] = 32\'h%s'%(i, BinToHex(bin_out[i])))

@@ -15,7 +15,8 @@ def is_number(string):
 
 def ReadInstLn():
     line =  resplit(',|\s|\(|\)', input())
-    return [w for w in line if w]
+    line = [w for w in line if w]
+    return line[: ([i for i in range(0, len(line)) if line[i][0] == '#'] + [len(line)])[0]]
 
 def FillZeroLeft(num_str, min_len):
     return ((min_len - len(num_str)) * '0') + num_str

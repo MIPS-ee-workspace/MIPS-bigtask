@@ -16,7 +16,8 @@ def is_number(string):
 def ReadInstLn():
     line =  resplit(',|\s|\(|\)', input())
     line = [w for w in line if w]
-    return line[: ([i for i in range(0, len(line)) if line[i][0] == '#'] + [len(line)])[0]]
+    return line[: ([i for i in range(0, len(line)) \
+        if line[i][0] == '#'] + [None])[0]]
 
 def FillZeroLeft(num_str, min_len):
     return ((min_len - len(num_str)) * '0') + num_str
@@ -45,7 +46,7 @@ def RegnameToNum(regname):
         return int(regname)
 
     if(regname[-1].isnumeric()):   # deals with symbolic expression like $ra, $t4
-        if(int(regname[-1]) < 8):  # $t8, $t9, $s8 need to be treated specially
+        if(int(regname[-1]) < 8):  # $t8, $t9, $s8 need to be treated separately
             return regnum_dict[regname[:-1]] + int(regname[-1])
         if regname[0] == 's':
             return regnum_dict['fp']    # $s8 is equivalent to $fp
@@ -99,13 +100,13 @@ for i in range(0, inst_cnt):
     # Deals with label, convert to binary
     if('imm' in parsed_inst[i]):
         if(not is_number(parsed_inst[i]['imm'])):
-            parsed_inst[i]['imm'] = str(label_dict[parsed_inst[i]['imm']] - i - 1)
+            parsed_inst[i]['imm'] = \
+                str(label_dict[parsed_inst[i]['imm']] - i - 1)
 
-    else:
-        if('target' in parsed_inst[i]):
-            if(not is_number(parsed_inst[i]['target'])):
-                parsed_inst[i]['target'] = \
-                    str(InstCntToAddr(label_dict[parsed_inst[i]['target']]))
+    elif('target' in parsed_inst[i]):
+        if(not is_number(parsed_inst[i]['target'])):
+            parsed_inst[i]['target'] = \
+                str(InstCntToAddr(label_dict[parsed_inst[i]['target']]))
 
     bin_out.append(ConvertToBin(parsed_inst[i]))
 

@@ -1,19 +1,15 @@
-module CPU_Control(Instruct,IRQ,PC_high,Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,
+module CPU_Control(opcode,Funct,Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,
                    Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
 
-input[31:0] Instruct;
-input IRQ,PC_high;//PC[31]
 input Interrupt,Exception;
-output[2:0] PCSrc;
+output[1:0] PCSrc;
 output[1:0] RegDst, MemToReg;
 output[5:0] ALUFun;
 output RegWr,ALUSrc1,ALUSrc2,Sign,MemWr,MemRd,EXTOp,LUOp;
-wire[5:0] opcode;
+input[5:0] opcode,Funct;
 wire Branch,I;
 
 //部分指令直接翻译控制信号
-assign opcode=Instruct[31:26];
-assign Funct=Instruct[5:0];
 assign I=(opcode==6'hf||opcode==6'h8||opcode==6'h9||opcode==6'hc||opcode==6'ha||opcode==6'hb);//判断是否是I型指令,lui,addi,addiu,andi,slti,sltiu
 assign branch_temp=(opcode==6'h4)||(opcode==6'h5)||(opcode==6'h6)||(opcode==6'h7)||(opcode==6'h1);  //beq,bne,blez,bgtz,bltz
 assign slt_temp=(opcode==6'h0&&Funct==6'h2a)||(opcode==6'ha)||(opcode==6'hb);  //slt,slti,sltiu

@@ -19,7 +19,7 @@ assign PCSrc[1]=(opcode==6'h2||opcode==6'h3||(opcode==6'h0&&Funct==6'h8)||(opcod
 assign RegDst[0]=((Interrupt&&~pchigh)||(Exception&&~pchigh)||I);//中断，异常，I型
 assign RegDst[1]=((Interrupt&&~pchigh)||(Exception&&~pchigh)||opcode==6'h3||(opcode==6'h0&&Funct==6'h9));//中断,异常,jal,jalr
 assign EXTOp=(opcode!=6'hc);//andi为0扩展，addi,addiu,slti,sltiu为符号扩展
-assign LUOp=(opcode!=6'hf);//lui
+assign LUOp=(opcode==6'hf);//lui
 assign ALUSrc1=(opcode==6'h00&&Funct==6'h00)||(opcode==6'h00&&Funct==6'h02);//sll,srl
 assign ALUSrc2=(I==1||opcode==6'h2b||opcode==6'h23);
 

@@ -1,4 +1,4 @@
-`timescale 1ns/1ps
+`timescale 1ns/1ns
 
 module test();
 	reg clk,sysclk,UART_RX;
@@ -152,7 +152,7 @@ wire[31:0] rdata2;
 wire[31:0] ReadData;
 wire MemRd1,MemRd2,MemWr1,MemWr2;
 
-assign {MemRd1,MemRd2,MemWr1,MemWr2}=(ALUOut < 32'h40000000)?{MemRd,1'b0,MemWr,1'b0}:{1'b0,MemRd,1'b0,MemWr};
+assign {MemRd2,MemRd1,MemWr2,MemWr1}=(ALUOut < 32'h40000000)?{MemRd,1'b0,MemWr,1'b0}:{1'b0,MemRd,1'b0,MemWr};
 
 Peripheral peripheral(reset,sysclk,clk,MemRd1,MemWr1,ALUOut,DatabusB,rdata1, led,switch,digi,timer, UART_RX,UART_TX,uart_send);
 DataMem data_memory(reset,clk,MemRd2,MemWr2,ALUOut,DatabusB,rdata2);

@@ -13,7 +13,7 @@ wire I,slt_temp,branch_temp;
 assign I=(opcode==6'hf||opcode==6'h8||opcode==6'h9||opcode==6'hc||opcode==6'ha||opcode==6'hb||opcode==6'h2b||opcode==6'h23||opcode==6'hd);//lui,addi,addiu,andi,slti,sltiu,sw,lw,ori
 assign branch_temp=(opcode==6'h4)||(opcode==6'h5)||(opcode==6'h6)||(opcode==6'h7)||(opcode==6'h1);  //beq,bne,blez,bgtz,bltz
 assign slt_temp=(opcode==6'h0&&Funct==6'h2a)||(opcode==6'ha)||(opcode==6'hb);  //slt,slti,sltiu
-assign RegWr=(opcode==6'h2b||branch_temp||opcode==6'h2||opcode==6'h0&&Funct==6'h8)?0:1;//sw,beq,bne,blez,bgtz,bltz,j,jr
+assign RegWr=(Interrupt==0 && Exception==0 && (opcode==6'h2b||branch_temp||opcode==6'h2||opcode==6'h0&&Funct==6'h8))?0:1;//异常和中断未发生时的sw,beq,bne,blez,bgtz,bltz,j,jr
 
 assign PCSrc[0]=(branch_temp||(opcode==6'h0&&Funct==6'h8)||(opcode==6'h0&&Funct==6'h9));//分支,jr,jalr
 assign PCSrc[1]=(opcode==6'h2||opcode==6'h3||(opcode==6'h0&&Funct==6'h8)||(opcode==6'h0&&Funct==6'h9));	//j,jal,jr,jalr

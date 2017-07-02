@@ -58,8 +58,7 @@ always@(negedge reset or posedge clk) begin
 		digi <= 12'h000;
 
 		UART_TXD <= 8'h00;
-		UART_CON[1:0] <= 2'b11;
-		uart_send <= 1'b0;
+		UART_CON[1:0] <= 2'b00;
 	end
 	else begin
 		if(TCON[0]) begin	//timer is enabled
@@ -71,8 +70,6 @@ always@(negedge reset or posedge clk) begin
 				TL <= TL + 1;
 			end
 		end
-
-		uart_send <= ( wr && addr==32'h40000018)?1:0;
 
 		if(wr) begin
 			case(addr)
@@ -148,36 +145,41 @@ always@(posedge clk or negedge reset)
 begin
 	if(~reset) begin
 		UART_TX <= 1;
-		UART_CON[2] <= 0;
+		UART_CON[2] <= 1;
 		UART_CON[4] <= 0;
+		uart_send <= 0;
 	end
-	else if(~UART_CON[4]) begin
-		UART_CON[2] <= 0;
-		UART_CON[4] <= uart_send;
-		UART_TX <= 1;
-	end
-	else if(UART_CON[0]) begin
-		case(wdata_state)
-			1:begin UART_TX <= 0;end
-			17:begin UART_TX <= UART_TXD[0];end
-			33:begin UART_TX <= UART_TXD[1];end
-			49:begin UART_TX <= UART_TXD[2];end
-			65:begin UART_TX <= UART_TXD[3];end
-			81:begin UART_TX <= UART_TXD[4];end
-			97:begin UART_TX <= UART_TXD[5];end
-			113:begin UART_TX <= UART_TXD[6];end
-			129:begin UART_TX <= UART_TXD[7];end
-			145:begin UART_TX <= 1;end
-			161:begin UART_TX <= 1;
-				UART_CON[4] <= 0;
-				UART_CON[2] <= 1;
-				end
-			default:;
-		endcase
-	end
+	else begin
 
-	if(rd && addr==32'h40000018)
-		UART_CON[2] <= 0;
+		if(wr && addr==32'h40000018)
+			uart_send <= 1;
+		if(rd && addr==32'h40000018)
+			UART_CON[2] <= 0;
+
+		if(~UART_CON[4]) begin
+			UART_CON[4] <= uart_send;
+			UART_TX <= 1;
+		end
+		else if(UART_CON[0]) begin
+			case(wdata_state)
+				1:begin UART_TX <= 0;end
+				17:begin UART_TX <= UART_TXD[0];end
+				33:begin UART_TX <= UART_TXD[1];end
+				49:begin UART_TX <= UART_TXD[2];end
+				65:begin UART_TX <= UART_TXD[3];end
+				81:begin UART_TX <= UART_TXD[4];end
+				97:begin UART_TX <= UART_TXD[5];end
+				113:begin UART_TX <= UART_TXD[6];end
+				129:begin UART_TX <= UART_TXD[7];end
+				145:begin UART_TX <= 1;end
+				161:begin UART_TX <= 1;
+					UART_CON[4] <= 0;
+					UART_CON[2] <= 1;
+					end
+				default:;
+			endcase
+		end
+	end
 end
 
 	always@(posedge baud_x16 or negedge UART_CON[4])

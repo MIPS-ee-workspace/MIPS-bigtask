@@ -63,10 +63,10 @@ always@(negedge reset or posedge clk) begin
 		core_hazard<=0;
 	end
 	else begin
-		PC<=(Exception || (PC_next[31]==1 && PC[31]==0))?32'h80000008:
-			(Interrupt)?32'h80000004:
+		PC<=((PC[31]==0 && Exception) || (PC_next[31]==1 && PC[31]==0))?32'h80000008:
+			(PC[31]==0 && Interrupt)?32'h80000004:
 			PC_next;
-		core_hazard<=(PC_next[31]==1 && PC[31]==0)?1:0;
+		core_hazard<=(PC_next[31]==1 && PC[31]==0)?1:0;	//only as a warning
 	end
 end
 

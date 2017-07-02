@@ -1,4 +1,4 @@
-module CPU_Control(Instruct,IRQ,Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,
+module CPU_Control(Instruct,IRQ,PC_high,Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,
                    Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
 
 input[31:0] Instruct;
@@ -24,7 +24,7 @@ assign RegDst[0]=(Interrupt||Exception||I);//中断，异常，I型
 assign RegDst[1]=(Interrupt||Exception||opcode==6'h3||(opcode==6'h0&&Funct==6'h9));//中断,异常,jal,jalr
 assign EXTOp=(opcode!=6'hc);//andi为0扩展，addi,addiu,slti,sltiu为符号扩展
 assign LUOp=(opcode!=6'hf);//lui
-assign ALUSrc1=(opcode=6'h00&&Funct==6'h00)||(opcode==6'h00&&Funct==6'h02);//sll,srl
+assign ALUSrc1=(opcode==6'h00&&Funct==6'h00)||(opcode==6'h00&&Funct==6'h02);//sll,srl
 assign ALUSrc2=(I==1);
 
 assign ALUFun[0]=branch_temp||slt_temp||(opcode==6'h0&&(Funct==6'h2||Funct==6'h3||Funct==6'h22||Funct==6'h23||Funct==6'h27));
@@ -40,7 +40,7 @@ assign ALUFun[4]=(opcode==6'h0&&Funct==6'h24)||(opcode==6'hc)||(opcode==6'h0&&Fu
 assign ALUFun[5]=(opcode==6'h0&&Funct==6'h0)||(opcode==6'h0&&Funct==6'h2)||(opcode==6'h0&&Funct==6'h3)||branch_temp||slt_temp;
 //sll,srl,sra,beq,bne,slt,slti,sltiu,blez,bltz,bgtz
 
-assign Sign=?((opcode=6'h00&&Funct==6'h21)||(opcode=6'h00&&Funct==6'h23)||(opcode==6'h9)||(opcode==6'h9))0:1;//addu,subu,addiu,sltiu
+assign Sign=((opcode==6'h00&&Funct==6'h21)||(opcode==6'h00&&Funct==6'h23)||(opcode==6'h9)||(opcode==6'h9))?0:1;//addu,subu,addiu,sltiu
 assign MemWr=(opcode==6'h2b);//sw
 assign MemRd=(opcode==6'h23);//lw
 assign MemToReg[0]=(opcode==6'h23);//lw

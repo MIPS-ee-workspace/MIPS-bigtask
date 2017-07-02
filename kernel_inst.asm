@@ -6,7 +6,7 @@ Main:
 lui $s0, 0x4000
 # $s0 = base data address
 lui $t0, 0xffff
-ori $t0, 0xffff
+ori $t0, $t0, 0xffff
 sw $t0, 4($s0)
 # TL = 0xffffffff
 addiu $t0, $0, 3
@@ -210,7 +210,7 @@ j UARTInterruptHandler
 
 ExceptionHandler:
 lui $t0, 0x4000
-ori $t0, 0x0010
+ori $t0, $t0, 0x0010
 lw $t0, 0($t0)
 # $t0 = switch
 srl $t0, $t0, 1
@@ -223,15 +223,14 @@ jr $ra
 
 TimerInterruptHandler:
 lui $t0, 0xffff
-ori $t0, 0xfff9
+ori $t0, $t0, 0xfff9
 # t0 = 0xffffff9
 lui $t1, 0x4000
-ori $t1, 0x0008
-lw $t2, 0($t1)
+lw $t2, 8($t1)
 # t1 = TCON
 and $t2, $t2, $t0
 # clear bit 1 and 2
-sw $t2, 0($t1)
+sw $t2, 8($t1)
 
 # 32'b0111111
 # 32'b0000110
@@ -300,9 +299,7 @@ sw $t1, 0($t0)
 
 BCDScan:
 lui $s2, 0x4000
-ori $s2, 0x0014
-# address of bcd control
-lw $t2, 0($s2)
+lw $t2, 20($s2) # 0x40000014, BCD control
 andi $t0, $t2, 0x0f00
 # extract ano
 srl $s0, $t0, 9
@@ -343,7 +340,7 @@ lw $t2, 0($t2)
 sll $t0, $s0, 8
 add $v0, $t0, $t2
 # Concatenate ano and bcd
-sw $v0, 0($s2)
+sw $v0, 20($s2) # 0x40000014, BCD control
 
 DisableTCON:
 lui $t1, 0x4000

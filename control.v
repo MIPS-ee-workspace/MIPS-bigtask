@@ -1,8 +1,8 @@
-module CPU_Control(Instruct,IRQ,PC_high,Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,
+module CPU_Control(Instruct,PC_high,Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,
                    Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
 
 input[31:0] Instruct;
-input IRQ,PC_high;//PC[31]
+input PC_high;//PC[31]
 input Interrupt,Exception;
 output[2:0] PCSrc;
 output[1:0] RegDst, MemToReg;

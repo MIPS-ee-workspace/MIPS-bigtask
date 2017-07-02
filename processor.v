@@ -104,7 +104,7 @@ wire[1:0] MemToReg;
 wire[5:0] ALUFun;
 wire RegWr,ALUSrc1,ALUSrc2,Sign,MemWr,MemRd,EXTOp,LUOp;
 
-CPU_Control(Instruct,IRQ,Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
+CPU_Control control(Instruction[31:26],Instruction[5:0],Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
 
 //
 

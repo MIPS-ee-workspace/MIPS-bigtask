@@ -9,7 +9,7 @@ module test();
 
 	initial begin
 		sysclk=0;
-		forever #30 clk=!clk;
+		forever #50 sysclk=!sysclk;
 	end
 
 	initial begin
@@ -18,8 +18,9 @@ module test();
 	end
 
 	initial begin
-		switch=8'hff;
+		switch=8'h00;
 		UART_RX=1;
+		#110 switch=8'h01;
 	end
 
 	Processor pro(sysclk,clk,led,switch,digi,UART_RX,UART_TX);
@@ -96,15 +97,13 @@ assign JT={PC4[31:28],Instruction[25:0],2'b00};
 //
 
 //control, Inte,Exce,zero,nega
-wire zero,negative;
-
 wire[1:0] PCSrc;
 wire[1:0] RegDst;
 wire[1:0] MemToReg;
 wire[5:0] ALUFun;
 wire RegWr,ALUSrc1,ALUSrc2,Sign,MemWr,MemRd,EXTOp,LUOp;
 
-CPU_Control control(Instruction[31:26],Instruction[5:0],Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
+CPU_Control control(Instruction[31:26],Instruction[5:0],PC[31],Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
 
 //
 
@@ -124,7 +123,7 @@ begin
 	endcase
 end
 
-RegFile register_file(reset,clk,Rs,DatabusA,Rt,DatabusB,RegWr,AddrC,DatabusC, uart);
+RegFile register_file(reset,clk,Rs,DatabusA,Rt,DatabusB,RegWr,AddrC,DatabusC, uart_send);
 //
 
 //ALU
@@ -141,7 +140,7 @@ assign ImmExt=(EXTOp && Imm16[15])?{16'hffff,Imm16}:{16'h0000,Imm16};
 assign Imm32=(LUOp)?{Imm16,16'h0000}:ImmExt;
 assign ALUIn2=(ALUSrc2)?Imm32:DatabusB;
 
-ALU ALU_mod(ALUIn1,ALUIn2,ALUFun,Sign,ALUOut,zero,negative,ALU_overflow);
+ALU ALU_mod(ALUIn1,ALUIn2,ALUFun,Sign,ALUOut,ALU_overflow);
 
 assign Offset={ImmExt[29:0],2'b00};
 assign ConBA=Offset+PC4;

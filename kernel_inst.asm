@@ -1,20 +1,26 @@
-0x00000000:
 j Main
-0x00000004:
 j Interrupt
-0x00000008:
 j Exception
 
 Main:
 
-# TODO: Timer start
-# sw TCON_start_value, TCON_address
+lui $s0, 0x4000
+ori $s0, 0x0004
+lui $s1, 0xffff
+ori $s1, 0xffff
+sw $s1, 0($s0)
+# TL = 0xffffffff
+addiu $s0, $s0, 4
+addiu $s1, $0, 3
+sw $s1, 0($s0)
+# TCON = 3
 
-# TODO: read two integers from UART, into $a0, $a1
+lui $s0, 0x4000
+ori $s0, 0x001c
 # uart_in read
-# lw $a0, uart_in
+lw $a0, 0($s0)
 # uart_in read
-# lw $a1, uart_in
+lw $a1, 0($s0)
 
 add $s0, $a0, $0
 add $s1, $a1, $0
@@ -197,8 +203,10 @@ beq $t0, $0, TimerInterruptHandler
 j UARTInterruptHandler
 
 ExceptionHandler:
-# TODO: switch address 
-# lw $t0, switch_address
+lui $t0, 0x4000
+ori $t0, 0x0010
+lw $t0, 0($t0)
+# $t0 = switch
 srl $t0, $t0, 1
 andi $t0, $t0, 1
 bne $t0, $0, Restore
@@ -348,5 +356,3 @@ UARTInterruptHandler:
 # processing cond
 # bne cond, $0, Restore
 # j UARTInterruptHandler
-
-

@@ -24,8 +24,7 @@ j GCD
 
 UARTRead:
 lw $t0, 32($s0) # 0x40000020, UART_CON
-srl $t0, $t0, 3
-andi $t0, $t0, 1
+andi $t0, $t0, 8
 beq $t0, $0, UARTRead
 jr $ra
 
@@ -202,7 +201,8 @@ jr $k0
 # switch 1 ~ interrupting
 
 InterruptHandler:
-lw $k1, 104($sp)
+addiu $t0, $sp, -124
+lw $k1, 104($t0)
 andi $t0, $k1, 1
 # 0: Timer, 1: UART
 beq $t0, $0, TimerInterruptHandler
@@ -210,11 +210,9 @@ j UARTInterruptHandler
 
 ExceptionHandler:
 lui $t0, 0x4000
-ori $t0, $t0, 0x0010
-lw $t0, 0($t0)
+lw $t0, 16($t0)
 # $t0 = switch
-srl $t0, $t0, 1
-andi $t0, $t0, 1
+andi $t0, $t0, 2
 bne $t0, $0, Restore
 j ExceptionHandler
 
@@ -248,54 +246,38 @@ sw $t2, 8($t1)
 # 32'b1011110
 # 32'b1111011
 # 32'b1110001
-add $t0, $sp, $0
 addiu $t1, $0, 63
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 0($sp)
 addiu $t1, $0, 6
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 4($sp)
 addiu $t1, $0, 91
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 8($sp)
 addiu $t1, $0, 79
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 12($sp)
 addiu $t1, $0, 102
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 16($sp)
 addiu $t1, $0, 109
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 20($sp)
 addiu $t1, $0, 125
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 24($sp)
 addiu $t1, $0, 7
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 28($sp)
 addiu $t1, $0, 127
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 32($sp)
 addiu $t1, $0, 111
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 36($sp)
 addiu $t1, $0, 111
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 40($sp)
 addiu $t1, $0, 124
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 44($sp)
 addiu $t1, $0, 57
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 48($sp)
 addiu $t1, $0, 94
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 52($sp)
 addiu $t1, $0, 123
-sw $t1, 0($t0)
-addiu $t0, $t0, 4
+sw $t1, 56($sp)
 addiu $t1, $0, 113
-sw $t1, 0($t0)
+sw $t1, 60($sp)
 
 BCDScan:
 lui $s2, 0x4000
@@ -328,6 +310,7 @@ andi $s1, $a0, 0x000f
 j BCD7seg
 a1l:
 andi $s1, $a1, 0x00f0
+srl $s1, $s1, 4
 j BCD7seg
 a1r:
 andi $s1, $a1, 0x000f
@@ -355,9 +338,7 @@ j Restore
 UARTInterruptHandler:
 lui $s0, 0x4000
 lw $t1, 32($s0) # UART_CON
-srl $t1, $t1, 2
-andi $t1, $t1, 1
+andi $t1, $t1, 4
 beq $t1, $0, UARTInterruptHandler
-addiu $s0, $s0, -8
-lw $t0, 32($s0)
+lw $t0, 24($s0) # UART_TXD
 j Restore

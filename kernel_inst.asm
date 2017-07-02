@@ -3,27 +3,31 @@ j Interrupt
 j Exception
 
 Main:
-
 lui $s0, 0x4000
-ori $s0, 0x0004
-lui $s1, 0xffff
-ori $s1, 0xffff
-sw $s1, 0($s0)
+# $s0 = base data address
+lui $t0, 0xffff
+ori $t0, 0xffff
+sw $t0, 4($s0)
 # TL = 0xffffffff
-addiu $s0, $s0, 4
-addiu $s1, $0, 3
-sw $s1, 0($s0)
+addiu $t0, $0, 3
+sw $t0, 8($s0)
 # TCON = 3
 
-lui $s0, 0x4000
-ori $s0, 0x001c
-# uart_in read
-lw $a0, 0($s0)
-# uart_in read
-lw $a1, 0($s0)
+jal UARTRead
+lw $a0, 28($s0) # 0x4000001c, UART_RXD
+jal UARTRead
+lw $a1, 28($s0)
 
 add $s0, $a0, $0
 add $s1, $a1, $0
+j GCD 
+
+UARTRead:
+lw $t0, 32($s0) # 0x40000020, UART_CON
+srl $t0, $t0, 3
+andi $t0, $t0, 1
+beq $t0, $0, UARTRead
+jr $ra
 
 GCD:
 slt $at, $s0, $s1
@@ -46,8 +50,10 @@ addu $v0, $s1, $0
 
 LEDOut:
 lui $s0, 0x4000
-ori $s0, 0x000c
-sw $v0, 0($s0)
+sw $v0, 12($s0) # 0x4000000c, LEDs
+
+UARTWrite:
+sw $v0, 24($s0) # 0x40000018, UART_TXD
 
 Finished:
 j Finished
@@ -293,13 +299,12 @@ addiu $t1, $0, 113
 sw $t1, 0($t0)
 
 BCDScan:
-addiu $t0, $0, 0x0f00
-# ano extractor
 lui $s2, 0x4000
 ori $s2, 0x0014
 # address of bcd control
 lw $t2, 0($s2)
-and $t0, $t2, $t0
+andi $t0, $t2, 0x0f00
+# extract ano
 srl $s0, $t0, 9
 # combination of $t0 = $t0 >> 8(get ano) and $t0 = $t0 >> 1(part of ano control logic)
 # ano control logic
@@ -342,17 +347,20 @@ sw $v0, 0($s2)
 
 DisableTCON:
 lui $t1, 0x4000
-ori $t1, 0x0008
-lw $t2, 0($t1)
+lw $t2, 8($t1)
 # t1 = TCON
 ori $t2, $t2, 2
 # set TCON[1] = 1
-sw $t2, 0($t1)
+sw $t2, 8($t1)
 
 j Restore
 
 UARTInterruptHandler:
-# lw cond, state_code_address
-# processing cond
-# bne cond, $0, Restore
-# j UARTInterruptHandler
+lui $s0, 0x4000
+lw $t1, 32($s0) # UART_CON
+srl $t1, $t1, 2
+andi $t1, $t1, 1
+beq $t1, $0, UARTInterruptHandler
+addiu $s0, $s0, -8
+lw $t0, 32($s0)
+j Restore

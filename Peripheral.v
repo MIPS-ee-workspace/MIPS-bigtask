@@ -53,8 +53,13 @@ always@(negedge reset or posedge clk) begin
 		TH <= 32'b0;
 		TL <= 32'b0;
 		TCON <= 3'b0;	
-		UART_TXD <= 0;
-		UART_CON[1:0] <= 0;
+
+		led <= 8'h00;
+		digi <= 12'h000;
+
+		UART_TXD <= 8'h00;
+		UART_CON[1:0] <= 2'b11;
+		uart_send <= 1'b0;
 	end
 	else begin
 		if(TCON[0]) begin	//timer is enabled
@@ -62,7 +67,9 @@ always@(negedge reset or posedge clk) begin
 				TL <= TH;
 				if(TCON[1]) TCON[2] <= 1'b1;		//irq is enabled
 			end
-			else TL <= TL + 1;
+			else begin
+				TL <= TL + 1;
+			end
 		end
 
 		uart_send <= ( wr && addr==32'h40000018)?1:0;
@@ -94,8 +101,9 @@ reg receive_state;
 always@(posedge clk or negedge reset)
 begin
 	if(~reset) begin
-		receive_state <= 0;
-		UART_RXD <= 0;
+		receive_state <= 1'b0;
+		UART_RXD <= 8'h00;
+		UART_CON[3] <= 1'b0;
 	end
 	else if(UART_CON[1] && receive_state) begin
 		case(rdata_state)

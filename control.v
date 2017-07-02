@@ -21,7 +21,7 @@ assign RegDst[1]=((Interrupt&&~pchigh)||(Exception&&~pchigh)||opcode==6'h3||(opc
 assign EXTOp=(opcode!=6'hc);//andi为0扩展，addi,addiu,slti,sltiu为符号扩展
 assign LUOp=(opcode==6'hf);//lui
 assign ALUSrc1=(opcode==6'h00&&Funct==6'h00)||(opcode==6'h00&&Funct==6'h02);//sll,srl
-assign ALUSrc2=(I==1||opcode==6'h2b||opcode==6'h23);
+assign ALUSrc2=(I==1||opcode==6'h2b||opcode==6'h23);//lui,addi,addiu,andi,slti,sltiu,sw,lw
 
 assign ALUFun[0]=branch_temp||slt_temp||(opcode==6'h0&&(Funct==6'h2||Funct==6'h3||Funct==6'h22||Funct==6'h23||Funct==6'h27));
 //sub,subu,nor,srl,sra,slt,slti,sltiu,beq,bne,blez,bgtz,bltz

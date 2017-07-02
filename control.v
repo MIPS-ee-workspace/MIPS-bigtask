@@ -1,14 +1,6 @@
-<<<<<<< HEAD
-module CPU_Control(Instruct,PC_high,Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,
-                   Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
-
-input[31:0] Instruct;
-input PC_high;//PC[31]
-=======
 module CPU_Control(opcode,Funct,Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,
                    Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
 
->>>>>>> e3cd139083c1c357b59a54d8012e68eabf9186a0
 input Interrupt,Exception;
 output[1:0] PCSrc;
 output[1:0] RegDst, MemToReg;

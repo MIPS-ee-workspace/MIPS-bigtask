@@ -16,25 +16,35 @@ Main:
 # uart_in read
 # lw $a1, uart_in
 
+add $s0, $a0, $0
+add $s1, $a1, $0
+
 GCD:
-slt $at, $a0, $a1
+slt $at, $s0, $s1
 beq $at, $0, Minus
-subu $a1, $a1, $a0
-beq $a1, $0, Ret0
+subu $s1, $s1, $s0
+beq $s1, $0, Ret0
 j GCD
 
 Minus:
-subu $a0, $a0, $a1
-beq $a0, $0, Ret1
+subu $s0, $s0, $s1
+beq $s0, $0, Ret1
 j GCD
 
 Ret0:
-addu $v0, $a0, $0
-# TODO: break
+addu $v0, $s0, $0
+j LEDOut
 
 Ret1:
-addu $v0, $a1, $0
-# TODO: break
+addu $v0, $s1, $0
+
+LEDOut:
+lui $s0, 0x4000
+ori $s0, 0x000c
+sw $v0, 0($s0)
+
+Finished:
+j Finished
 
 Interrupt:
 sw $1, 0($sp)
@@ -68,7 +78,9 @@ sw $28, 108($sp)
 sw $29, 112($sp)
 sw $30, 116($sp)
 sw $31, 120($sp)
+addiu $sp, $sp, 124
 jal InterruptHandler
+addiu $sp, $sp, -124
 lw $1, 0($sp)
 lw $2, 4($sp)
 lw $3, 8($sp)
@@ -136,7 +148,9 @@ sw $28, 108($sp)
 sw $29, 112($sp)
 sw $30, 116($sp)
 sw $31, 120($sp)
+addiu $sp, $sp, 124
 jal ExceptionHandler
+addiu $sp, $sp, -124
 lw $1, 0($sp)
 lw $2, 4($sp)
 lw $3, 8($sp)
@@ -194,14 +208,145 @@ Restore:
 jr $ra
 
 TimerInterruptHandler:
-# lw cond, state_code_address
-# processing cond
-# bne cond, $0, Restore
-# j TimerInterruptHandler
+lui $t0, 0xffff
+ori $t0, 0xfff9
+# t0 = 0xffffff9
+lui $t1, 0x4000
+ori $t1, 0x0008
+lw $t2, 0($t1)
+# t1 = TCON
+and $t2, $t2, $t0
+# clear bit 1 and 2
+sw $t2, 0($t1)
+
+# 32'b0111111
+# 32'b0000110
+# 32'b1011011
+# 32'b1001111
+# 32'b1100110
+# 32'b1101101
+# 32'b1111101
+# 32'b0000111
+# 32'b1111111
+# 32'b1101111
+# 32'b1101111
+# 32'b1111100
+# 32'b0111001
+# 32'b1011110
+# 32'b1111011
+# 32'b1110001
+add $t0, $sp, $0
+addiu $t1, $0, 63
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 6
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 91
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 79
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 102
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 109
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 125
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 7
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 127
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 111
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 111
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 124
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 57
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 94
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 123
+sw $t1, 0($t0)
+addiu $t0, $t0, 4
+addiu $t1, $0, 113
+sw $t1, 0($t0)
+
+BCDScan:
+addiu $t0, $0, 0x0f00
+# ano extractor
+lui $s2, 0x4000
+ori $s2, 0x0014
+# address of bcd control
+lw $t2, 0($s2)
+and $t0, $t2, $t0
+srl $s0, $t0, 9
+# combination of $t0 = $t0 >> 8(get ano) and $t0 = $t0 >> 1(part of ano control logic)
+# ano control logic
+# ano = (ano == 0b1000) ? 0b0100:
+#      (ano == 0b0100) ? 0b0010:
+#      (ano == 0b0010) ? 0b0001:
+#      (ano == 0b0001) ? 0b1000
+bne $s0, $0, Skip
+addiu $s0, $0, 8
+# $s0 = ano for the sequel
+Skip:
+addiu $t2, $0, 1
+addiu $t3, $0, 2
+addiu $t4, $0, 4
+beq $s0, $t2, a1r
+beq $s0, $t3, a1l
+beq $s0, $t4, a0r
+a0l:
+andi $s1, $a0, 0x00f0
+srl $s1, $s1, 4
+j BCD7seg
+a0r:
+andi $s1, $a0, 0x000f
+j BCD7seg
+a1l:
+andi $s1, $a1, 0x00f0
+j BCD7seg
+a1r:
+andi $s1, $a1, 0x000f
+
+BCD7seg:
+sll $t2, $s1, 2
+add $t2, $sp, $t2
+lw $t2, 0($t2)
+# load bcd translation
+sll $t0, $s0, 8
+add $v0, $t0, $t2
+# Concatenate ano and bcd
+sw $v0, 0($s2)
+
+DisableTCON:
+lui $t1, 0x4000
+ori $t1, 0x0008
+lw $t2, 0($t1)
+# t1 = TCON
+ori $t2, $t2, 2
+# set TCON[1] = 1
+sw $t2, 0($t1)
+
+j Restore
 
 UARTInterruptHandler:
 # lw cond, state_code_address
 # processing cond
 # bne cond, $0, Restore
 # j UARTInterruptHandler
+
 

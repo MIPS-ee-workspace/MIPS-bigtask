@@ -116,7 +116,7 @@ j ExceptionHandler
 TimerInterruptHandler:
 lw $s2, 8($s0)
 # s2 = TCON
-addiu $s1, $0, -7
+addiu $s1, $0, 0xfff9
 # s1 = 0xffffff9
 and $s2, $s2, $s1
 # clear bit 1 and 2
@@ -132,7 +132,7 @@ sw $s2, 8($s0)
 # 32'b0000111
 # 32'b1111111
 # 32'b1101111
-# 32'b1101111
+# 32'b1110111
 # 32'b1111100
 # 32'b0111001
 # 32'b1011110
@@ -229,6 +229,6 @@ lw $s1, 32($s0) # UART_CON
 andi $s1, $s1, 4
 beq $s1, $0, UARTInterruptHandler
 lw $s1, 24($s0) # UART_TXD
-addi $s1,$0,-2
-and $k1,$k1,$s1
+addi $s1, $0, -2
+and $k1, $k1, $s1
 j Restore

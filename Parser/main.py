@@ -111,4 +111,4 @@ for i in range(0, inst_cnt):
     bin_out.append(ConvertToBin(parsed_inst[i]))
 
 for i in range(0, inst_cnt):
-    print('ROM_DATA[%d] = 32\'h%s;'%(i, BinToHex(bin_out[i])))
+    print('ROM_DATA[%d] <= 32\'h%s;'%(i, BinToHex(bin_out[i])))

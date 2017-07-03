@@ -228,4 +228,6 @@ lw $s1, 32($s0) # UART_CON
 andi $s1, $s1, 4
 beq $s1, $0, UARTInterruptHandler
 lw $s1, 24($s0) # UART_TXD
+addi $s1,$0,-2
+and $k1,$k1,$s1
 j Restore

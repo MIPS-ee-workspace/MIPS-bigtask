@@ -14,7 +14,6 @@ input [7:0] switch;
 output [11:0] digi;
 reg [11:0] digi;
 output timer,uart_send;
-reg uart_send;
 
 input UART_RX;
 output UART_TX;
@@ -23,6 +22,7 @@ reg UART_TX;
 reg[7:0] UART_RXD;
 reg[7:0] UART_TXD;
 reg[4:0] UART_CON;
+assign uart_send=UART_CON[4];
 
 //timer + other display
 reg [31:0] TH,TL;
@@ -146,20 +146,17 @@ always@(posedge clk or negedge reset)
 begin
 	if(~reset) begin
 		UART_TX <= 1;
-		UART_CON[2] <= 1;
+		UART_CON[2] <= 0;
 		UART_CON[4] <= 0;
-		uart_send <= 0;
 	end
 	else begin
 
 		if(wr && addr==32'h40000018)
-			uart_send <= 1;
+			UART_CON[4] <= 1;
 		else if(rd && addr==32'h40000018) begin
 			UART_CON[2] <= 0;
-			uart_send <=0;
 		end
 		else if(~UART_CON[4]) begin
-			UART_CON[4] <= uart_send;
 			UART_TX <= 1;
 		end
 		else if(UART_CON[0]) begin
@@ -177,7 +174,6 @@ begin
 				161:begin UART_TX <= 1;
 					UART_CON[4] <= 0;
 					UART_CON[2] <= 1;
-					uart_send <= 0;
 					end
 				default:;
 			endcase

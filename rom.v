@@ -5,7 +5,7 @@ input [30:0] addr;
 output [31:0] data;
 output overflow;
 
-localparam ROM_SIZE = 144;
+localparam ROM_SIZE = 160;
 (* rom_style = "distributed" *) reg [31:0] ROM_DATA[ROM_SIZE-1:0];
 
 assign data=(addr[30:2] < ROM_SIZE)?ROM_DATA[addr[30:2]]:32'b0;

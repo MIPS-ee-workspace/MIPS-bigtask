@@ -5,9 +5,10 @@ j Exception
 Main:
 lui $s0, 0x4000
 # $s0 = base data address
-addiu $t0, $0, -1
+addiu $t0, $0, -2048
+sw $t0, 0($s0)
 sw $t0, 4($s0)
-# TL = 0xffffffff
+# TH, TL = -2048
 addiu $t0, $0, 3
 sw $t0, 8($s0)
 # TCON = 3
@@ -157,7 +158,7 @@ addiu $s2, $0, 127
 sw $s2, 32($sp)
 addiu $s2, $0, 111
 sw $s2, 36($sp)
-addiu $s2, $0, 111
+addiu $s2, $0, 119
 sw $s2, 40($sp)
 addiu $s2, $0, 124
 sw $s2, 44($sp)

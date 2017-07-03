@@ -1,7 +1,7 @@
-module CPU_Control(opcode,Funct,pchigh,Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,
+module CPU_Control(opcode,Funct,Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,
                    Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
 
-input Interrupt,Exception,pchigh;
+input Interrupt,Exception;
 output[1:0] PCSrc;
 output[1:0] RegDst, MemToReg;
 output[5:0] ALUFun;
@@ -17,8 +17,8 @@ assign RegWr=(Interrupt==0 && Exception==0 && (opcode==6'h2b||branch_temp||opcod
 
 assign PCSrc[0]=(branch_temp||(opcode==6'h0&&Funct==6'h8)||(opcode==6'h0&&Funct==6'h9));//分支,jr,jalr
 assign PCSrc[1]=(opcode==6'h2||opcode==6'h3||(opcode==6'h0&&Funct==6'h8)||(opcode==6'h0&&Funct==6'h9));	//j,jal,jr,jalr
-assign RegDst[0]=((Interrupt&&~pchigh)||(Exception&&~pchigh)||I);//中断，异常，I型
-assign RegDst[1]=((Interrupt&&~pchigh)||(Exception&&~pchigh)||opcode==6'h3||(opcode==6'h0&&Funct==6'h9));//中断,异常,jal,jalr
+assign RegDst[0]=(Interrupt||Exception||I);//中断，异常，I型
+assign RegDst[1]=(Interrupt||Exception||opcode==6'h3||(opcode==6'h0&&Funct==6'h9));//中断,异常,jal,jalr
 assign EXTOp=(opcode!=6'hc&&opcode!=6'hd);//andi,ori为0扩展，addi,addiu,slti,sltiu为符号扩展
 assign LUOp=(opcode==6'hf);//lui
 assign ALUSrc1=(opcode==6'h00&&Funct==6'h00)||(opcode==6'h00&&Funct==6'h02)||(opcode==6'h00&&Funct==6'h03);//sll,srl,sra
@@ -41,7 +41,7 @@ assign Sign=((opcode==6'h00&&Funct==6'h21)||(opcode==6'h00&&Funct==6'h23)||(opco
 assign MemWr=(opcode==6'h2b);//sw
 assign MemRd=(opcode==6'h23);//lw
 assign MemToReg[0]=(opcode==6'h23);//lw
-assign MemToReg[1]=((Interrupt&&~pchigh)||(Exception&&~pchigh)||opcode==6'h3||(opcode==6'h0&&Funct==6'h9));//中断,异常,jal,jalr
+assign MemToReg[1]=(Interrupt||Exception||opcode==6'h3||(opcode==6'h0&&Funct==6'h9));//中断,异常,jal,jalr
 
 endmodule
 

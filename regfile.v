@@ -21,7 +21,7 @@ always@(negedge reset or posedge clk) begin
 	else begin
 		if(wr && addr3) RF_DATA[addr3] <= data3;
 
-		RF_DATA[27][0]<=(uart==1)?1:0;	//$k1 is to save condition code, here con[0]=1 means that the interrupt is uart_send
+		if(uart==1) RF_DATA[27][0]<= 1'b1;	//$k1 is to save condition code, here con[0]=1 means that the interrupt is uart_send
 
 	end
 end

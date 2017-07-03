@@ -45,11 +45,11 @@ assign reset=switch[0];
 wire Interrupt,Exception;
 
 wire timer,uart_send;
-assign Interrupt=timer || uart_send;
+assign Interrupt=(timer || uart_send) && (PC[31]==0);
 
 reg core_hazard;
 wire PC_overflow,ALU_overflow;
-assign Exception=core_hazard || PC_overflow || ALU_overflow;
+assign Exception=(core_hazard || PC_overflow || ALU_overflow) && (PC[31]==0);
 //
 
 //PC, core_hazard
@@ -103,7 +103,7 @@ wire[1:0] MemToReg;
 wire[5:0] ALUFun;
 wire RegWr,ALUSrc1,ALUSrc2,Sign,MemWr,MemRd,EXTOp,LUOp;
 
-CPU_Control control(Instruction[31:26],Instruction[5:0],PC[31],Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
+CPU_Control control(Instruction[31:26],Instruction[5:0],Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
 
 //
 

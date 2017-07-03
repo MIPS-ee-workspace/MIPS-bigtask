@@ -153,10 +153,11 @@ begin
 
 		if(wr && addr==32'h40000018)
 			uart_send <= 1;
-		if(rd && addr==32'h40000018)
+		else if(rd && addr==32'h40000018) begin
 			UART_CON[2] <= 0;
-
-		if(~UART_CON[4]) begin
+			uart_send <=0;
+		end
+		else if(~UART_CON[4]) begin
 			UART_CON[4] <= uart_send;
 			UART_TX <= 1;
 		end
@@ -175,6 +176,7 @@ begin
 				161:begin UART_TX <= 1;
 					UART_CON[4] <= 0;
 					UART_CON[2] <= 1;
+					uart_send <= 0;
 					end
 				default:;
 			endcase

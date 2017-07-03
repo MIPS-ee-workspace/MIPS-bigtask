@@ -14,6 +14,8 @@ module top(sysclk,switch,UART_RX,led,digi,UART_TX);
 		clk_state <= (clk_state==5)?0:clk_state+1;	//100M/9600/16=651.04
 	end
 
-	Processor processor(sysclk,clk,~led,switch,~digi,UART_RX,UART_TX)
+	wire[11:0] digi2;
+	assign digi=~digi2;
+	Processor processor(sysclk,clk,led,switch,digi2,UART_RX,UART_TX);
 
 endmodule

@@ -103,9 +103,7 @@ begin
 		UART_CON[3] <= 1'b0;
 	end
 	else begin
-		if(rd && addr==32'h4000001C)
-			UART_CON[3] <= 0;
-		else if(UART_CON[1] && receive_state) begin
+		if(UART_CON[1] && receive_state) begin
 			case(rdata_state)
 				24:begin UART_RXD[0] <= UART_RX;end
 				40:begin UART_RXD[1] <= UART_RX;end
@@ -126,6 +124,8 @@ begin
 			receive_state <= ~UART_RX;
 		end
 	end
+	if(rd && addr==32'h4000001C)
+		UART_CON[3] <= 0;
 end
 
 always@(posedge baud_x16 or negedge receive_state)

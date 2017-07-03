@@ -23,16 +23,22 @@ assign Interrupt=(timer || uart_send) && (PC[31]==0);
 
 reg core_hazard;
 wire PC_overflow,ALU_overflow;
-assign Exception=(core_hazard || PC_overflow || ALU_overflow) && (PC[31]==0);
+assign Exception=(core_hazard || PC_overflow) && (PC[31]==0);
+
+reg[2:0] led_exce;
+
+assign led[10]=led_exce[2];
+assign led[9]=led_exce[1];
+assign led[8]=led_exce[0];
 
 always@(posedge sysclk or negedge reset) begin
 	if(~reset)begin
-		led[10:8] <= 3'b000;
+		led_exce[2:0] <= 3'b000;
 	end
 	else begin
-		if(core_hazard) led[10] <= 1'b1;
-		if(PC_overflow) led[9] <= 1'b1;
-		if(ALU_overflow) led[8] <= 1'b1;
+		if(core_hazard) led_exce[2] <= 1'b1;
+		if(PC_overflow) led_exce[1] <= 1'b1;
+		if(ALU_overflow) led_exce[0] <= 1'b1;
 	end
 end
 
@@ -168,13 +174,5 @@ begin
 	endcase
 end
 //
-
-
-initial begin
-	PC=0;
-	
-
-end
-
 
 endmodule

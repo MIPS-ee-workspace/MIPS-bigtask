@@ -40,7 +40,7 @@ module ALU_adder(input[31:0] A,
 		   output reg N,
 		   output reg Z);
 reg[31:0] _B;
-reg[32:0] carry;//记录进位情况
+//reg[32:0] carry;//记录进位情况
 integer i;
 always @(A, B, ALUFun, Sign) begin
 _B=B;
@@ -50,12 +50,17 @@ case(ALUFun[0])
 	1'b0:begin
 		S=A+_B;
 
-		if(Sign==1) begin
-			carry=0;//初始化
+		if(Sign==1)
+			/*carry=0;//初始化
 			for(i=0;i<32;i=i+1)
 				carry[i+1]=(A[i]&_B[i])|(A[i]&carry[i])|(_B[i]&carry[i]);
-			V=(carry[31])^(carry[32]);//判断是否溢出
-		end
+			V=(carry[31])^(carry[32]);//判断是否溢出*/
+			if(A[31]==0&&_B[31]==0)
+				V=S[31];
+			else if(A[31]==1&&_B[31]==1)
+				V=~S[31];
+			else
+				V=0;
 		else V=0;
 
 		Z=(S==0)?1:0;//结果是否为0
@@ -69,10 +74,16 @@ case(ALUFun[0])
 		S=A+_B;
 
 		if(Sign==1)begin
-			carry=0;//初始化
+			/*carry=0;//初始化
 			for(i=0;i<32;i=i+1)
 				carry[i+1]=(A[i]&_B[i])|(A[i]&carry[i])|(_B[i]&carry[i]);
-			V=(carry[31])^(carry[32]);//判断是否溢出
+			V=(carry[31])^(carry[32]);//判断是否溢出*/
+			if(A[31]==0&&_B[31]==0)
+				V=S[31];
+			else if(A[31]==1&&_B[31]==1)
+				V=~S[31];
+			else
+				V=0;
 		end
 		else V=0;
 
@@ -80,7 +91,7 @@ case(ALUFun[0])
 		if(Sign==1)//结果是否为负
 			N=S[31];
 		else 
-			N=~carry[32];
+			N=S[31];
 	end 
 	default:begin
 		S=0;

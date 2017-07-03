@@ -5,7 +5,7 @@ module Processor(sysclk,clk,led,switch,digi,UART_RX,UART_TX);
 //set switch link
 
 input clk,sysclk,UART_RX;
-output [7:0] led;
+output [10:0] led;
 input [7:0] switch;
 output [11:0] digi;
 output UART_TX;
@@ -24,6 +24,18 @@ assign Interrupt=(timer || uart_send) && (PC[31]==0);
 reg core_hazard;
 wire PC_overflow,ALU_overflow;
 assign Exception=(core_hazard || PC_overflow || ALU_overflow) && (PC[31]==0);
+
+always@(posedge sysclk or negedge reset) begin
+	if(~reset)begin
+		led[10:8] <= 3'b000;
+	end
+	else begin
+		if(core_hazard) led[10] <= 1'b1;
+		if(PC_overflow) led[9] <= 1'b1;
+		if(ALU_overflow) led[8] <= 1'b1;
+	end
+end
+
 //
 
 //PC, core_hazard
@@ -127,7 +139,7 @@ wire MemRd1,MemRd2,MemWr1,MemWr2;
 
 assign {MemRd2,MemRd1,MemWr2,MemWr1}=(ALUOut < 32'h40000000)?{MemRd,1'b0,MemWr,1'b0}:{1'b0,MemRd,1'b0,MemWr};
 
-Peripheral peripheral(reset,sysclk,clk,MemRd1,MemWr1,ALUOut,DatabusB,rdata1, led,switch,digi,timer, UART_RX,UART_TX,uart_send);
+Peripheral peripheral(reset,sysclk,clk,MemRd1,MemWr1,ALUOut,DatabusB,rdata1, led[7:0],switch,digi,timer, UART_RX,UART_TX,uart_send);
 DataMem data_memory(reset,clk,MemRd2,MemWr2,ALUOut,DatabusB,rdata2);
 
 assign ReadData= rdata1 | rdata2;

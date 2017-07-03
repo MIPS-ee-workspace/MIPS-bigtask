@@ -58,7 +58,7 @@ always@(negedge reset or posedge clk) begin
 		digi <= 12'h000;
 
 		UART_TXD <= 8'h00;
-		UART_CON[1:0] <= 2'b00;
+		UART_CON[1:0] <= 2'b11;
 	end
 	else begin
 		if(TCON[0]) begin	//timer is enabled
@@ -90,7 +90,7 @@ end
 //uart receiver, UART_CON[3]
 wire baud_x16;
 
-baud_rate_generator baud(sysclk,baud_x16);
+baud_rate_generator baud(reset,sysclk,baud_x16);
 
 reg[7:0] rdata_state;
 reg receive_state;
@@ -197,17 +197,22 @@ end
 
 endmodule
 
-module baud_rate_generator(sys_clk,baud_clk_16);
-	input sys_clk;
+module baud_rate_generator(reset,sys_clk,baud_clk_16);
+	input reset,sys_clk;
 	output baud_clk_16;
 	reg baud_clk_16;
 	reg[8:0] baud_state;
 
-	always@(posedge sys_clk)
+	always@(posedge sys_clk or negedge reset)
 	begin
-		if(baud_state==0)
-			baud_clk_16=~baud_clk_16;
-		baud_state=(baud_state==324)?0:baud_state+1;	//100M/9600/16=651.04
+		if(~reset) begin
+			baud_clk_16 <= 0;
+			baud_state <= 0;
+		end
+		else begin
+			if(baud_state==0)
+				baud_clk_16=~baud_clk_16;
+			baud_state=(baud_state==1)?0:baud_state+1;	//100M/9600/16=651.04
+		end
 	end
-
 endmodule

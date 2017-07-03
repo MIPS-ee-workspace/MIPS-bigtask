@@ -115,7 +115,7 @@ j ExceptionHandler
 TimerInterruptHandler:
 lw $s2, 8($s0)
 # s2 = TCON
-addiu $s1, $0, -6
+addiu $s1, $0, -7
 # s1 = 0xffffff9
 and $s2, $s2, $s1
 # clear bit 1 and 2

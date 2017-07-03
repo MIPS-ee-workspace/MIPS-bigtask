@@ -9,7 +9,7 @@ module test();
 
 	initial begin
 		sysclk=0;
-		forever #50 sysclk=!sysclk;
+		forever #100 sysclk=!sysclk;
 	end
 
 	initial begin
@@ -18,8 +18,12 @@ module test();
 	end
 
 	initial begin
-		switch=8'h00;
 		UART_RX=1;
+		forever #1000 UART_RX=!UART_RX;
+	end
+
+	initial begin
+		switch=8'h00;
 		#110 switch=8'h01;
 	end
 
@@ -42,6 +46,7 @@ assign reset=switch[0];
 //
 
 //Interrupt,Exception
+reg[31:0] PC;
 wire Interrupt,Exception;
 
 wire timer,uart_send;
@@ -53,7 +58,6 @@ assign Exception=(core_hazard || PC_overflow || ALU_overflow) && (PC[31]==0);
 //
 
 //PC, core_hazard
-reg[31:0] PC;
 reg[31:0] PC_next;
 wire[31:0] PC4;
 
@@ -162,9 +166,9 @@ assign ReadData= rdata1 | rdata2;
 always@(*)
 begin
 	case(MemToReg)
+		2'b00:DatabusC<=ALUOut;
 		2'b01:DatabusC<=ReadData;
-		2'b10:DatabusC<=PC4;
-		default:DatabusC<=ALUOut;
+		default:DatabusC<=PC4;
 	endcase
 end
 //

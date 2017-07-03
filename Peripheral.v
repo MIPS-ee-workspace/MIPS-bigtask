@@ -211,8 +211,8 @@ module baud_rate_generator(reset,sys_clk,baud_clk_16);
 		end
 		else begin
 			if(baud_state==0)
-				baud_clk_16=~baud_clk_16;
-			baud_state=(baud_state==324)?0:baud_state+1;	//100M/9600/16=651.04
+				baud_clk_16 <= ~baud_clk_16;
+			baud_state <= (baud_state==324)?0:baud_state+1;	//100M/9600/16=651.04
 		end
 	end
 endmodule

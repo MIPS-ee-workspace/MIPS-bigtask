@@ -1,35 +1,4 @@
-`timescale 1ns/1ns
-
-module test();
-	reg clk,sysclk,UART_RX;
-	reg [7:0] switch;
-	wire[7:0] led;
-	wire[11:0] digi;
-	wire UART_TX;
-
-	initial begin
-		sysclk=0;
-		forever #100 sysclk=!sysclk;
-	end
-
-	initial begin
-		clk=0;
-		forever #100 clk=!clk;
-	end
-
-	initial begin
-		UART_RX=1;
-		forever #1000 UART_RX=!UART_RX;
-	end
-
-	initial begin
-		switch=8'h00;
-		#110 switch=8'h01;
-	end
-
-	Processor pro(sysclk,clk,led,switch,digi,UART_RX,UART_TX);
-
-endmodule
+`timescale 1ns/1ps
 
 module Processor(sysclk,clk,led,switch,digi,UART_RX,UART_TX);
 

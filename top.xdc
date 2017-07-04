@@ -41,8 +41,6 @@ create_clock -period 10.000 -name CLK -waveform {0.000 5.000} [get_ports sysclk]
 
 set_property IOSTANDARD LVCMOS33 [get_ports sysclk]
 
-set_property CFGBVS Vcco [current_design]
-set_property config_voltage 3.3 [current_design]
 set_property IOSTANDARD LVCMOS33 [get_ports {UART_RX}]
 set_property IOSTANDARD LVCMOS33 [get_ports {UART_TX}]
 set_property IOSTANDARD LVCMOS33 [get_ports {switch[0]}]

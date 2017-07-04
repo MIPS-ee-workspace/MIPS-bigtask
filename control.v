@@ -38,7 +38,7 @@ assign ALUFun[5]=(opcode==6'h0&&Funct==6'h0)||(opcode==6'h0&&Funct==6'h2)||(opco
 //sll,srl,sra,beq,bne,slt,slti,sltiu,blez,bltz,bgtz
 
 assign Sign=((opcode==6'h00&&Funct==6'h21)||(opcode==6'h00&&Funct==6'h23)||(opcode==6'h9)||(opcode==6'h9))?0:1;//addu,subu,addiu,sltiu
-assign MemWr=(opcode==6'h2b);//sw
+assign MemWr=(opcode==6'h2b && Interrupt==0 && Exception==0);//sw
 assign MemRd=(opcode==6'h23);//lw
 assign MemToReg[0]=(opcode==6'h23);//lw
 assign MemToReg[1]=(Interrupt||Exception||opcode==6'h3||(opcode==6'h0&&Funct==6'h9));//中断,异常,jal,jalr

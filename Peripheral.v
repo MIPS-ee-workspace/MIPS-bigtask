@@ -10,6 +10,7 @@ reg [31:0] rdata;
 
 output [7:0] led;
 reg [7:0] led;
+
 input [7:0] switch;
 output [11:0] digi;
 reg [11:0] digi;
@@ -104,7 +105,7 @@ begin
 	end
 	else begin
 		if(rd && addr==32'h4000001C)
-			UART_CON[3] <= 0;
+			UART_CON[3] <= 1'b0;
 		else if(UART_CON[1] && receive_state) begin
 			case(rdata_state)
 				24:begin UART_RXD[0] <= UART_RX;end
@@ -116,8 +117,8 @@ begin
 				120:begin UART_RXD[6] <= UART_RX;end
 				136:begin UART_RXD[7] <= UART_RX;end
 				160:begin
-					receive_state <= 0;
-					UART_CON[3] <= 1;
+					receive_state <= 1'b0;
+					UART_CON[3] <= 1'b1;
 					end
 				default:;
 			endcase
@@ -131,7 +132,7 @@ end
 always@(posedge baud_x16 or negedge receive_state)
 begin
 	if(~receive_state) begin
-		rdata_state <= 0;
+		rdata_state <= 8'h00;
 	end
 	else begin
 		rdata_state <= rdata_state+1;

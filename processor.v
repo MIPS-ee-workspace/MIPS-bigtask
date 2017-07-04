@@ -82,9 +82,7 @@ wire[31:0] ConBA_EX;
 wire[31:0] DatabusA_ID;
 wire[1:0] PCSrc_ID;
 reg[1:0] PCSrc_2;
-wire[31:0] BRAN;
-assign BRAN=(ALUOut_EX[0])?ConBA_EX:PC4_2;
-assign PC_next=(PCSrc_2==2'b01)?BRAN:
+assign PC_next=(PCSrc_2==2'b01 && ALUOut_EX[0])?ConBA_EX:
 				(PCSrc_ID==2'b10)?JT_ID:
 				(PCSrc_ID==2'b11)?DatabusA_ID:
 				PC4_IF;
@@ -106,12 +104,24 @@ always@(negedge reset or posedge clk) begin
 		MemWr_1 <= 1'd0;
 	end
 	else begin
-		Instruction_1 <= Instruction_IF;
-		PC4_1 <= PC4_IF;
 		RegDst_1 <= RegDst_IF;
 		MemToReg_1 <= MemToReg_IF;
 		RegWr_1 <= RegWr_IF;
-		MemWr_1 <= MemWr_IF;
+		if(PCSrc_2==2'b01 && ALUOut_EX[0]) begin
+			Instruction_1 <= 32'd0;
+			PC4_1 <= PC4_2;			//since branch\j and interrupt may happen at the same time
+			MemWr_1 <= 1'd0;		//this must be change when branch\j happen
+		end
+		else if(PCSrc_ID[1]) begin
+			Instruction_1 <= 32'd0;
+			PC4_1 <= PC4_1;
+			MemWr_1 <= 1'd0;
+		end
+		else begin
+			Instruction_1 <= Instruction_IF;
+			PC4_1 <= PC4_IF;
+			MemWr_1 <= MemWr_IF;
+		end
 	end
 end
 
@@ -180,7 +190,6 @@ always@(negedge reset or posedge clk) begin
 		MemRd_2 <= 1'd0;
 	end
 	else begin
-		PCSrc_2 <= PCSrc_ID;
 		PC4_2 <= PC4_1;
 		ALUIn1_2 <= ALUIn1_ID;
 		ALUIn2_2 <= ALUIn2_ID;
@@ -192,9 +201,17 @@ always@(negedge reset or posedge clk) begin
 		RegDst_2 <= RegDst_1;
 		MemToReg_2 <= MemToReg_1;
 		Sign_2 <= Sign_ID;
-		RegWr_2 <= RegWr_1;
-		MemWr_2 <= MemWr_1;
 		MemRd_2 <= MemRd_ID;
+		if(PCSrc_2==2'b01 && ALUOut_EX[0]) begin
+			PCSrc_2 <= 2'b00;
+			RegWr_2 <= 1'b0;
+			MemWr_2 <= 1'b0;
+		end
+		else begin
+			PCSrc_2 <= PCSrc_ID;
+			RegWr_2 <= RegWr_1;
+			MemWr_2 <= MemWr_1;
+		end
 	end
 end
 

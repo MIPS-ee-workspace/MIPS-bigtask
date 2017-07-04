@@ -65,8 +65,10 @@ end
 	//
 
 	//Instruction Memory
+wire[31:0] Instruction_tempt;
 wire[31:0] Instruction_IF;
-ROM instruction_memory(PC_IF[30:0],Instruction_IF,PC_overflow);
+ROM instruction_memory(PC_IF[30:0],Instruction_tempt,PC_overflow);
+assign Instruction_IF=(Interrupt||Exception)?32'd0:Instruction_tempt;	//to make the instruction useless
 	//
 
 	//control_IF, Inte,Exce
@@ -107,12 +109,12 @@ always@(negedge reset or posedge clk) begin
 		RegDst_1 <= RegDst_IF;
 		MemToReg_1 <= MemToReg_IF;
 		RegWr_1 <= RegWr_IF;
-		if(PCSrc_2==2'b01 && ALUOut_EX[0]) begin
+		if(PCSrc_2==2'b01 && ALUOut_EX[0] && (PC_IF[31]==1'b0 || PC4_2[31]==1'b1)) begin		//the branch\j from user cannot overwrite the core
 			Instruction_1 <= 32'd0;
-			PC4_1 <= PC4_2;			//since branch\j and interrupt may happen at the same time
-			MemWr_1 <= 1'd0;		//this must be change when branch\j happen
+			PC4_1 <= PC4_2;			//since branch\j and interrupt may happen at the same time, so let $k0 = PC4 of branch\j
+			MemWr_1 <= 1'd0;		//this must be zero when branch\j happen
 		end
-		else if(PCSrc_ID[1]) begin
+		else if(PCSrc_ID[1] && (PC_IF[31]==1'b0 || PC4_1[31]==1'b1)) begin
 			Instruction_1 <= 32'd0;
 			PC4_1 <= PC4_1;
 			MemWr_1 <= 1'd0;
@@ -190,27 +192,29 @@ always@(negedge reset or posedge clk) begin
 		MemRd_2 <= 1'd0;
 	end
 	else begin
-		PC4_2 <= PC4_1;
 		ALUIn1_2 <= ALUIn1_ID;
 		ALUIn2_2 <= ALUIn2_ID;
 		DatabusB_2 <= DatabusB_ID;
 		ImmExt_2 <= ImmExt_ID;
-		Rt_2 <= Rt_ID;
-		Rd_2 <= Rd_ID;
 		ALUFun_2 <= ALUFun_ID;
+		RegWr_2 <= RegWr_1;
 		RegDst_2 <= RegDst_1;
 		MemToReg_2 <= MemToReg_1;
 		Sign_2 <= Sign_ID;
 		MemRd_2 <= MemRd_ID;
 		if(PCSrc_2==2'b01 && ALUOut_EX[0]) begin
-			PCSrc_2 <= 2'b00;
-			RegWr_2 <= 1'b0;
-			MemWr_2 <= 1'b0;
+			PC4_2 <= PC4_2;		//since branch\j and interrupt may happen at the same time
+			PCSrc_2 <= 2'b00;	//make this instruction not influence the former instruction
+			MemWr_2 <= 1'b0;	//make this instruction useless
+			Rt_2 <= 5'd0;
+			Rd_2 <= 5'd0;
 		end
 		else begin
+			PC4_2 <= PC4_1;
 			PCSrc_2 <= PCSrc_ID;
-			RegWr_2 <= RegWr_1;
 			MemWr_2 <= MemWr_1;
+			Rt_2 <= Rt_ID;
+			Rd_2 <= Rd_ID;
 		end
 	end
 end

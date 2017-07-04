@@ -15,18 +15,17 @@ assign reset=switch[0];
 //
 
 //Interrupt,Exception
-reg[31:0] PC;
+reg[31:0] PC_IF;
 wire Interrupt,Exception;
 
 wire timer,uart_send;
-assign Interrupt=(timer || uart_send) && (PC[31]==0);
+assign Interrupt=(timer || uart_send) && (PC_IF[31]==0);
 
 reg core_hazard;
 wire PC_overflow,ALU_overflow;
-assign Exception=(core_hazard || PC_overflow) && (PC[31]==0);
+assign Exception=(core_hazard || PC_overflow) && (PC_IF[31]==0);
 
 reg[2:0] led_exce;
-
 assign led[10]=led_exce[2];
 assign led[9]=led_exce[1];
 assign led[8]=led_exce[0];
@@ -47,61 +46,72 @@ end
 
 //IF
 	//PC,core_hazard
-reg[31:0] PC_next;
+wire[31:0] PC_next;
 wire[31:0] PC4_IF;
-
+assign PC4_IF=PC_IF+4;
 always@(negedge reset or posedge clk) begin
 	if(~reset)begin
-		PC<=0;
+		PC_IF<=0;
 		core_hazard<=0;
 	end
 	else begin
-		PC<=((PC[31]==0 && Exception) || (PC_next[31]==1 && PC[31]==0))?32'h80000008:
-			(PC[31]==0 && Interrupt)?32'h80000004:
-			PC_next;
-		core_hazard<=(PC_next[31]==1 && PC[31]==0)?1:0;	//only as a warning
+		PC_IF<=(Exception || (PC_next[31]==1 && PC_IF[31]==0))?32'h80000008:
+				(Interrupt)?32'h80000004:
+				PC_next;
+		core_hazard<=(PC_next[31]==1 && PC_IF[31]==0)?1:0;	//only as a warning
 	end
 end
 
-assign PC4_IF=PC+4;
 	//
 
 	//Instruction Memory
 wire[31:0] Instruction_IF;
-ROM instruction_memory(PC[30:0],Instruction_IF,PC_overflow);
+ROM instruction_memory(PC_IF[30:0],Instruction_IF,PC_overflow);
 	//
 
-	//PC_next	need big change
-wire[31:0] JT;
-assign JT={PC4_IF[31:28],Instruction_IF[25:0],2'b00};
+	//control_IF, Inte,Exce
+wire[1:0] RegDst_IF;
+wire[1:0] MemToReg_IF;
+wire RegWr_IF,MemWr_IF;
+CPU_Control_IF control_IF(Instruction_IF[31:26],Instruction_IF[5:0],Interrupt,Exception,RegDst_IF,RegWr_IF,MemWr_IF,MemToReg_IF);
+	//
 
-wire[31:0] ConBA2;
-wire[31:0] DatabusA;
-
-assign ConBA2=(ALUOut[0])?ConBA:PC4_IF;
-
-always@(*)
-begin
-	case(PCSrc)
-		2'b01:PC_next<=ConBA2;
-		2'b10:PC_next<=JT;
-		2'b11:PC_next<=DatabusA;
-		default:PC_next<=PC4_IF;
-	endcase
-end
+	//PC_next
+wire[31:0] JT_ID;
+wire[31:0] ConBA_EX;
+wire[31:0] DatabusA_ID;
+wire[1:0] PCSrc_ID;
+reg[1:0] PCSrc_2;
+wire[31:0] BRAN;
+assign BRAN=(ALUOut_EX[0])?ConBA_EX:PC4_2;
+assign PC_next=(PCSrc_2==2'b01)?BRAN:
+				(PCSrc_ID==2'b10)?JT_ID:
+				(PCSrc_ID==2'b11)?DatabusA_ID:
+				PC4_IF;
 	//
 
 //	IF/ID
 reg[31:0] Instruction_1;
 reg[31:0] PC4_1;
+reg[1:0] RegDst_1;
+reg[1:0] MemToReg_1;
+reg RegWr_1,MemWr_1;
 always@(negedge reset or posedge clk) begin
 	if(~reset)begin
 		Instruction_1 <= 32'd0;
 		PC4_1 <= 32'd0;
+		RegDst_1 <= 2'd0;
+		MemToReg_1 <= 2'd0;
+		RegWr_1 <= 1'd0;
+		MemWr_1 <= 1'd0;
 	end
 	else begin
 		Instruction_1 <= Instruction_IF;
 		PC4_1 <= PC4_IF;
+		RegDst_1 <= RegDst_IF;
+		MemToReg_1 <= MemToReg_IF;
+		RegWr_1 <= RegWr_IF;
+		MemWr_1 <= MemWr_IF;
 	end
 end
 
@@ -115,15 +125,12 @@ assign Shamt[4:0]=Instruction_1[10:6];
 wire[15:0] Imm16;
 assign Imm16[15:0]=Instruction_1[15:0];
 
-	//control, Inte,Exce
-wire[1:0] PCSrc;
-wire[1:0] RegDst_ID;
-wire[1:0] MemToReg_ID;
+assign JT_ID={PC4_1[31:28],Instruction_1[25:0],2'b00};	//for j-type, to change pc_next in IF
+
+	//control_ID, Inte,Exce
 wire[5:0] ALUFun_ID;
-wire RegWr_ID,ALUSrc1,ALUSrc2,Sign_ID,MemWr_ID,MemRd_ID,EXTOp,LUOp;
-
-CPU_Control control(Instruction_1[31:26],Instruction_1[5:0],Interrupt,Exception,PCSrc,RegDst_ID,RegWr_ID,ALUSrc1,ALUSrc2,ALUFun_ID,Sign_ID,MemWr_ID,MemRd_ID,MemToReg_ID,EXTOp,LUOp);
-
+wire ALUSrc1,ALUSrc2,Sign_ID,MemRd_ID,EXTOp,LUOp;
+CPU_Control_ID control_ID(Instruction_1[31:26],Instruction_1[5:0],PCSrc_ID,ALUSrc1,ALUSrc2,ALUFun_ID,Sign_ID,MemRd_ID,EXTOp,LUOp);
 	//
 
 	//Register File
@@ -131,15 +138,13 @@ reg[4:0] AddrC;
 reg[31:0] DatabusC;
 reg RegWr_3;
 wire[31:0] DatabusB_ID;
-
-RegFile register_file(reset,clk,Instruction_1[25:21],DatabusA,Rt_ID,DatabusB_ID,RegWr_3,AddrC,DatabusC, uart_send);//change RegWr
+RegFile register_file(reset,clk,Instruction_1[25:21],DatabusA_ID,Rt_ID,DatabusB_ID,RegWr_3,AddrC,DatabusC, uart_send);//change RegWr
 	//
-
 wire[31:0] ALUIn1_ID;
 wire[31:0] ALUIn2_ID;
 wire[31:0] Imm32;
 wire[31:0] ImmExt_ID;
-assign ALUIn1_ID=(ALUSrc1)?{27'd0,Shamt[4:0]}:DatabusA;
+assign ALUIn1_ID=(ALUSrc1)?{27'd0,Shamt[4:0]}:DatabusA_ID;
 assign ImmExt_ID=(EXTOp && Imm16[15])?{16'hffff,Imm16}:{16'h0000,Imm16};
 assign Imm32=(LUOp)?{Imm16,16'h0000}:ImmExt_ID;
 assign ALUIn2_ID=(ALUSrc2)?Imm32:DatabusB_ID;
@@ -158,6 +163,7 @@ reg[4:0] Rd_2;
 reg Sign_2,RegWr_2,MemWr_2,MemRd_2;
 always@(negedge reset or posedge clk) begin
 	if(~reset)begin
+		PCSrc_2 <= 2'd0;
 		PC4_2 <= 32'd0;
 		ALUIn1_2 <= 32'd0;
 		ALUIn2_2 <= 32'd0;
@@ -174,6 +180,7 @@ always@(negedge reset or posedge clk) begin
 		MemRd_2 <= 1'd0;
 	end
 	else begin
+		PCSrc_2 <= PCSrc_ID;
 		PC4_2 <= PC4_1;
 		ALUIn1_2 <= ALUIn1_ID;
 		ALUIn2_2 <= ALUIn2_ID;
@@ -182,11 +189,11 @@ always@(negedge reset or posedge clk) begin
 		Rt_2 <= Rt_ID;
 		Rd_2 <= Rd_ID;
 		ALUFun_2 <= ALUFun_ID;
-		RegDst_2 <= RegDst_ID;
-		MemToReg_2 <= MemToReg_ID;
+		RegDst_2 <= RegDst_1;
+		MemToReg_2 <= MemToReg_1;
 		Sign_2 <= Sign_ID;
-		RegWr_2 <= RegWr_ID;
-		MemWr_2 <= MemWr_ID;
+		RegWr_2 <= RegWr_1;
+		MemWr_2 <= MemWr_1;
 		MemRd_2 <= MemRd_ID;
 	end
 end
@@ -197,9 +204,8 @@ wire[31:0] ALUOut_EX;
 ALU ALU_mod(ALUIn1_2,ALUIn2_2,ALUFun_2,Sign_2,ALUOut_EX,ALU_overflow);
 
 wire[31:0] Offset;
-wire[31:0] ConBA;
 assign Offset={ImmExt_2[29:0],2'b00};
-assign ConBA=Offset+PC4_2;
+assign ConBA_EX=Offset+PC4_2;
 	//
 
 //	EX/MEM

@@ -10,11 +10,11 @@ reg [31:0] rdata;
 
 output [7:0] led;
 reg [7:0] led;
-
 input [7:0] switch;
 output [11:0] digi;
 reg [11:0] digi;
 output timer,uart_send;
+reg uart_send;
 
 input UART_RX;
 output UART_TX;
@@ -23,7 +23,6 @@ reg UART_TX;
 reg[7:0] UART_RXD;
 reg[7:0] UART_TXD;
 reg[4:0] UART_CON;
-assign uart_send=UART_CON[4];
 
 //timer + other display
 reg [31:0] TH,TL;
@@ -104,9 +103,7 @@ begin
 		UART_CON[3] <= 1'b0;
 	end
 	else begin
-		if(rd && addr==32'h4000001C)
-			UART_CON[3] <= 1'b0;
-		else if(UART_CON[1] && receive_state) begin
+		if(UART_CON[1] && receive_state) begin
 			case(rdata_state)
 				24:begin UART_RXD[0] <= UART_RX;end
 				40:begin UART_RXD[1] <= UART_RX;end
@@ -117,8 +114,8 @@ begin
 				120:begin UART_RXD[6] <= UART_RX;end
 				136:begin UART_RXD[7] <= UART_RX;end
 				160:begin
-					receive_state <= 1'b0;
-					UART_CON[3] <= 1'b1;
+					receive_state <= 0;
+					UART_CON[3] <= 1;
 					end
 				default:;
 			endcase
@@ -127,12 +124,14 @@ begin
 			receive_state <= ~UART_RX;
 		end
 	end
+	if(rd && addr==32'h4000001C)
+		UART_CON[3] <= 0;
 end
 
 always@(posedge baud_x16 or negedge receive_state)
 begin
 	if(~receive_state) begin
-		rdata_state <= 8'h00;
+		rdata_state <= 0;
 	end
 	else begin
 		rdata_state <= rdata_state+1;
@@ -147,17 +146,20 @@ always@(posedge clk or negedge reset)
 begin
 	if(~reset) begin
 		UART_TX <= 1;
-		UART_CON[2] <= 0;
+		UART_CON[2] <= 1;
 		UART_CON[4] <= 0;
+		uart_send <= 0;
 	end
 	else begin
 
 		if(wr && addr==32'h40000018)
-			UART_CON[4] <= 1;
+			uart_send <= 1;
 		else if(rd && addr==32'h40000018) begin
 			UART_CON[2] <= 0;
+			uart_send <=0;
 		end
 		else if(~UART_CON[4]) begin
+			UART_CON[4] <= uart_send;
 			UART_TX <= 1;
 		end
 		else if(UART_CON[0]) begin
@@ -175,6 +177,7 @@ begin
 				161:begin UART_TX <= 1;
 					UART_CON[4] <= 0;
 					UART_CON[2] <= 1;
+					uart_send <= 0;
 					end
 				default:;
 			endcase

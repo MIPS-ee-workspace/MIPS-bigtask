@@ -1,38 +1,11 @@
-`timescale 1ns/1ns
-
-module test();
-	reg clk,sysclk,UART_RX;
-	reg [7:0] switch;
-	wire[7:0] led;
-	wire[11:0] digi;
-	wire UART_TX;
-
-	initial begin
-		sysclk=0;
-		forever #50 sysclk=!sysclk;
-	end
-
-	initial begin
-		clk=0;
-		forever #100 clk=!clk;
-	end
-
-	initial begin
-		switch=8'h00;
-		UART_RX=1;
-		#110 switch=8'h01;
-	end
-
-	Processor pro(sysclk,clk,led,switch,digi,UART_RX,UART_TX);
-
-endmodule
+`timescale 1ns/1ps
 
 module Processor(sysclk,clk,led,switch,digi,UART_RX,UART_TX);
 
 //set switch link
 
 input clk,sysclk,UART_RX;
-output [7:0] led;
+output [10:0] led;
 input [7:0] switch;
 output [11:0] digi;
 output UART_TX;
@@ -42,18 +15,36 @@ assign reset=switch[0];
 //
 
 //Interrupt,Exception
+reg[31:0] PC;
 wire Interrupt,Exception;
 
 wire timer,uart_send;
-assign Interrupt=timer || uart_send;
+assign Interrupt=(timer || uart_send) && (PC[31]==0);
 
 reg core_hazard;
 wire PC_overflow,ALU_overflow;
-assign Exception=core_hazard || PC_overflow || ALU_overflow;
+assign Exception=(core_hazard || PC_overflow) && (PC[31]==0);
+
+reg[2:0] led_exce;
+
+assign led[10]=led_exce[2];
+assign led[9]=led_exce[1];
+assign led[8]=led_exce[0];
+
+always@(posedge sysclk or negedge reset) begin
+	if(~reset)begin
+		led_exce[2:0] <= 3'b000;
+	end
+	else begin
+		if(core_hazard) led_exce[2] <= 1'b1;
+		if(PC_overflow) led_exce[1] <= 1'b1;
+		if(ALU_overflow) led_exce[0] <= 1'b1;
+	end
+end
+
 //
 
 //PC, core_hazard
-reg[31:0] PC;
 reg[31:0] PC_next;
 wire[31:0] PC4;
 
@@ -63,10 +54,10 @@ always@(negedge reset or posedge clk) begin
 		core_hazard<=0;
 	end
 	else begin
-		PC<=(Exception || (PC_next[31]==1 && PC[31]==0))?32'h80000008:
-			(Interrupt)?32'h80000004:
+		PC<=((PC[31]==0 && Exception) || (PC_next[31]==1 && PC[31]==0))?32'h80000008:
+			(PC[31]==0 && Interrupt)?32'h80000004:
 			PC_next;
-		core_hazard<=(PC_next[31]==1 && PC[31]==0)?1:0;
+		core_hazard<=(PC_next[31]==1 && PC[31]==0)?1:0;	//only as a warning
 	end
 end
 
@@ -103,7 +94,7 @@ wire[1:0] MemToReg;
 wire[5:0] ALUFun;
 wire RegWr,ALUSrc1,ALUSrc2,Sign,MemWr,MemRd,EXTOp,LUOp;
 
-CPU_Control control(Instruction[31:26],Instruction[5:0],PC[31],Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
+CPU_Control control(Instruction[31:26],Instruction[5:0],Interrupt,Exception,PCSrc,RegDst,RegWr,ALUSrc1,ALUSrc2,ALUFun,Sign,MemWr,MemRd,MemToReg,EXTOp,LUOp);
 
 //
 
@@ -154,7 +145,7 @@ wire MemRd1,MemRd2,MemWr1,MemWr2;
 
 assign {MemRd2,MemRd1,MemWr2,MemWr1}=(ALUOut < 32'h40000000)?{MemRd,1'b0,MemWr,1'b0}:{1'b0,MemRd,1'b0,MemWr};
 
-Peripheral peripheral(reset,sysclk,clk,MemRd1,MemWr1,ALUOut,DatabusB,rdata1, led,switch,digi,timer, UART_RX,UART_TX,uart_send);
+Peripheral peripheral(reset,sysclk,clk,MemRd1,MemWr1,ALUOut,DatabusB,rdata1, led[7:0],switch,digi,timer, UART_RX,UART_TX,uart_send);
 DataMem data_memory(reset,clk,MemRd2,MemWr2,ALUOut,DatabusB,rdata2);
 
 assign ReadData= rdata1 | rdata2;
@@ -162,9 +153,9 @@ assign ReadData= rdata1 | rdata2;
 always@(*)
 begin
 	case(MemToReg)
+		2'b00:DatabusC<=ALUOut;
 		2'b01:DatabusC<=ReadData;
-		2'b10:DatabusC<=PC4;
-		default:DatabusC<=ALUOut;
+		default:DatabusC<=PC4;
 	endcase
 end
 //
@@ -183,13 +174,5 @@ begin
 	endcase
 end
 //
-
-
-initial begin
-	PC=0;
-	
-
-end
-
 
 endmodule

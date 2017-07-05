@@ -44,10 +44,23 @@ end
 //
 
 
-//IF
+//	preIF
+	//PC_next
+wire[31:0] PC4_IF;
+wire[31:0] JT_ID;
+wire[31:0] DatabusA_ID;
+wire[1:0] PCSrc_ID;
+wire[31:0] ConBA_EX;
+wire[31:0] ALUOut_EX;
+reg[1:0] PCSrc_2;
+assign PC_next=(PCSrc_2==2'b01 && ALUOut_EX[0])?ConBA_EX:
+				(PCSrc_ID==2'b10)?JT_ID:
+				(PCSrc_ID==2'b11)?DatabusA_ID:
+				PC4_IF;
+	//
+
 	//PC,core_hazard
 wire[31:0] PC_next;
-wire[31:0] PC4_IF;
 assign PC4_IF=PC_IF+4;
 always@(negedge reset or posedge clk) begin
 	if(~reset)begin
@@ -62,13 +75,13 @@ always@(negedge reset or posedge clk) begin
 	end
 end
 
-	//
 
+//IF
 	//Instruction Memory
 wire[31:0] Instruction_tempt;
 wire[31:0] Instruction_IF;
 ROM instruction_memory(PC_IF[30:0],Instruction_tempt,PC_overflow);
-assign Instruction_IF=(Interrupt||Exception)?32'd0:Instruction_tempt;	//to make the instruction useless
+assign Instruction_IF=(Interrupt||Exception)?32'd0:Instruction_tempt;	//to make the instruction useless, since branch\j may influence the former
 	//
 
 	//control_IF, Inte,Exce
@@ -78,17 +91,6 @@ wire RegWr_IF,MemWr_IF;
 CPU_Control_IF control_IF(Instruction_IF[31:26],Instruction_IF[5:0],Interrupt,Exception,RegDst_IF,RegWr_IF,MemWr_IF,MemToReg_IF);
 	//
 
-	//PC_next
-wire[31:0] JT_ID;
-wire[31:0] ConBA_EX;
-wire[31:0] DatabusA_ID;
-wire[1:0] PCSrc_ID;
-reg[1:0] PCSrc_2;
-assign PC_next=(PCSrc_2==2'b01 && ALUOut_EX[0])?ConBA_EX:
-				(PCSrc_ID==2'b10)?JT_ID:
-				(PCSrc_ID==2'b11)?DatabusA_ID:
-				PC4_IF;
-	//
 
 //	IF/ID
 reg[31:0] Instruction_1;
@@ -114,7 +116,7 @@ always@(negedge reset or posedge clk) begin
 			PC4_1 <= PC4_2;			//since branch\j and interrupt may happen at the same time, so let $k0 = PC4 of branch\j
 			MemWr_1 <= 1'd0;		//this must be zero when branch\j happen
 		end
-		else if(PCSrc_ID[1] && (PC_IF[31]==1'b0 || PC4_1[31]==1'b1)) begin
+		else if(PCSrc_ID[1]) begin
 			Instruction_1 <= 32'd0;
 			PC4_1 <= PC4_1;
 			MemWr_1 <= 1'd0;
@@ -128,6 +130,8 @@ always@(negedge reset or posedge clk) begin
 end
 
 //ID
+wire[4:0] Rs_ID;
+assign Rs_ID[4:0]=Instruction_1[25:21];
 wire[4:0] Rt_ID;
 assign Rt_ID[4:0]=Instruction_1[20:16];
 wire[4:0] Rd_ID;
@@ -139,18 +143,30 @@ assign Imm16[15:0]=Instruction_1[15:0];
 
 assign JT_ID={PC4_1[31:28],Instruction_1[25:0],2'b00};	//for j-type, to change pc_next in IF
 
-	//control_ID, Inte,Exce
+	//control_ID
 wire[5:0] ALUFun_ID;
 wire ALUSrc1,ALUSrc2,Sign_ID,MemRd_ID,EXTOp,LUOp;
 CPU_Control_ID control_ID(Instruction_1[31:26],Instruction_1[5:0],PCSrc_ID,ALUSrc1,ALUSrc2,ALUFun_ID,Sign_ID,MemRd_ID,EXTOp,LUOp);
 	//
 
 	//Register File
-reg[4:0] AddrC;
-reg[31:0] DatabusC;
+wire[4:0] AddrC;
+reg[31:0] DatabusC_MEM;
 reg RegWr_3;
+wire[31:0] DatabusB_tempt;
+wire[31:0] DatabusA_tempt;
+RegFile register_file(reset,clk,Rs_ID,DatabusA_tempt,Rt_ID,DatabusB_tempt,RegWr_3,AddrC,DatabusC_MEM, uart_send);
+
+wire[31:0] forward_EX;
+assign forward_EX=(MemToReg_2[1])?PC4_2:ALUOut_EX;
+assign DatabusA_ID=(Rs_ID && RegWr_2 && Rd_2==Rs_ID)?forward_EX:	//forwarding: To make jr overwrite feasible, DatabusA must be changed in ID
+					(Rs_ID && RegWr_3 && Rd_3==Rs_ID)?DatabusC_MEM:
+					DatabusA_tempt;
 wire[31:0] DatabusB_ID;
-RegFile register_file(reset,clk,Instruction_1[25:21],DatabusA_ID,Rt_ID,DatabusB_ID,RegWr_3,AddrC,DatabusC, uart_send);//change RegWr
+assign DatabusB_ID=(Rt_ID && RegWr_2 && Rd_2==Rt_ID)?forward_EX:
+					(Rt_ID && RegWr_3 && Rd_3==Rt_ID)?DatabusC_MEM:
+					DatabusB_tempt;
+
 	//
 wire[31:0] ALUIn1_ID;
 wire[31:0] ALUIn2_ID;
@@ -168,9 +184,7 @@ reg[31:0] ALUIn2_2;
 reg[31:0] DatabusB_2;
 reg[31:0] ImmExt_2;
 reg[5:0] ALUFun_2;
-reg[1:0] RegDst_2;
 reg[1:0] MemToReg_2;
-reg[4:0] Rt_2;
 reg[4:0] Rd_2;
 reg Sign_2,RegWr_2,MemWr_2,MemRd_2;
 always@(negedge reset or posedge clk) begin
@@ -181,10 +195,8 @@ always@(negedge reset or posedge clk) begin
 		ALUIn2_2 <= 32'd0;
 		DatabusB_2 <= 32'd0;
 		ImmExt_2 <= 32'd0;
-		Rt_2 <= 5'd0;
 		Rd_2 <= 5'd0;
 		ALUFun_2 <= 6'd0;
-		RegDst_2 <= 2'd0;
 		MemToReg_2 <= 2'd0;
 		Sign_2 <= 1'd0;
 		RegWr_2 <= 1'd0;
@@ -198,7 +210,6 @@ always@(negedge reset or posedge clk) begin
 		ImmExt_2 <= ImmExt_ID;
 		ALUFun_2 <= ALUFun_ID;
 		RegWr_2 <= RegWr_1;
-		RegDst_2 <= RegDst_1;
 		MemToReg_2 <= MemToReg_1;
 		Sign_2 <= Sign_ID;
 		MemRd_2 <= MemRd_ID;
@@ -206,22 +217,24 @@ always@(negedge reset or posedge clk) begin
 			PC4_2 <= PC4_2;		//since branch\j and interrupt may happen at the same time
 			PCSrc_2 <= 2'b00;	//make this instruction not influence the former instruction
 			MemWr_2 <= 1'b0;	//make this instruction useless
-			Rt_2 <= 5'd0;
-			Rd_2 <= 5'd0;
+			Rd_2 <= (RegDst_1==2'b11)?5'd26:5'd0;
 		end
 		else begin
 			PC4_2 <= PC4_1;
 			PCSrc_2 <= PCSrc_ID;
 			MemWr_2 <= MemWr_1;
-			Rt_2 <= Rt_ID;
-			Rd_2 <= Rd_ID;
+			case(RegDst_1)
+				2'b01:Rd_2<=Rt_ID;
+				2'b10:Rd_2<=5'd31;
+				2'b11:Rd_2<=5'd26;
+				default:Rd_2<=Rd_ID;
+			endcase
 		end
 	end
 end
 
 //EX
 	//ALU
-wire[31:0] ALUOut_EX;
 ALU ALU_mod(ALUIn1_2,ALUIn2_2,ALUFun_2,Sign_2,ALUOut_EX,ALU_overflow);
 
 wire[31:0] Offset;
@@ -233,9 +246,7 @@ assign ConBA_EX=Offset+PC4_2;
 reg[31:0] PC4_3;
 reg[31:0] ALUOut_3;
 reg[31:0] DatabusB_3;
-reg[1:0] RegDst_3;
 reg[1:0] MemToReg_3;
-reg[4:0] Rt_3;
 reg[4:0] Rd_3;
 reg MemWr_3,MemRd_3;
 always@(negedge reset or posedge clk) begin
@@ -243,9 +254,7 @@ always@(negedge reset or posedge clk) begin
 		PC4_3 <= 32'd0;
 		ALUOut_3 <= 32'd0;
 		DatabusB_3 <= 32'd0;
-		Rt_3 <= 5'd0;
 		Rd_3 <= 5'd0;
-		RegDst_3 <= 2'd0;
 		MemToReg_3 <= 2'd0;
 		RegWr_3 <= 1'd0;
 		MemWr_3 <= 1'd0;
@@ -255,9 +264,7 @@ always@(negedge reset or posedge clk) begin
 		PC4_3 <= PC4_2;
 		ALUOut_3 <= ALUOut_EX;
 		DatabusB_3 <= DatabusB_2;
-		Rt_3 <= Rt_2;
 		Rd_3 <= Rd_2;
-		RegDst_3 <= RegDst_2;
 		MemToReg_3 <= MemToReg_2;
 		RegWr_3 <= RegWr_2;
 		MemWr_3 <= MemWr_2;
@@ -279,21 +286,13 @@ assign ReadData = rdata1 | rdata2;
 always@(*)
 begin
 	case(MemToReg_3)
-		2'b00:DatabusC<=ALUOut_3;
-		2'b01:DatabusC<=ReadData;
-		default:DatabusC<=PC4_3;
+		2'b00:DatabusC_MEM <= ALUOut_3;
+		2'b01:DatabusC_MEM <= ReadData;
+		default:DatabusC_MEM <= PC4_3;
 	endcase
 end
 
-always@(*)
-begin
-	case(RegDst_3)
-		2'b01:AddrC<=Rt_3;
-		2'b10:AddrC<=5'd31;
-		2'b11:AddrC<=5'd26;
-		default:AddrC<=Rd_3;
-	endcase
-end
+assign Addrc=Rd_3;
 	//
 //MEM
 

@@ -59,7 +59,8 @@ assign PC_next=(PCSrc_2==2'b01 && ALUOut_EX[0] && (PC_0[31]==1'b0 || PC4_2[31]==
 				PC4_IF;
 	//
 
-	//PC,core_hazard
+	//PC,core_hazard,load_use_hazard
+wire load_use_hazard;
 assign PC4_IF=PC_0+4;
 always@(negedge reset or posedge clk) begin
 	if(~reset)begin
@@ -67,7 +68,8 @@ always@(negedge reset or posedge clk) begin
 		core_hazard<=0;
 	end
 	else begin
-		PC_0<=(Exception || (PC_next[31]==1 && PC_0[31]==0))?32'h80000008:
+		PC_0<=(load_use_hazard)? PC_0:
+				(Exception || (PC_next[31]==1 && PC_0[31]==0))?32'h80000008:	//or try to enter core condition
 				(Interrupt)?32'h80000004:
 				PC_next;
 		core_hazard<=(PC_next[31]==1 && PC_0[31]==0)?1:0;	//only as a warning
@@ -107,23 +109,25 @@ always@(negedge reset or posedge clk) begin
 		MemWr_1 <= 1'd0;
 	end
 	else begin
-		RegDst_1 <= RegDst_IF;
-		MemToReg_1 <= MemToReg_IF;
-		RegWr_1 <= RegWr_IF;
-		if(PCSrc_2==2'b01 && ALUOut_EX[0] && (PC_0[31]==1'b0 || PC4_2[31]==1'b1)) begin		//the branch\j from user cannot overwrite the core
-			Instruction_1 <= 32'd0;
-			PC4_1 <= PC4_2;			//since branch\j and interrupt may happen at the same time, so let $k0 = PC4 of branch\j
-			MemWr_1 <= 1'd0;		//this must be zero when branch\j happen
-		end
-		else if(PCSrc_ID[1]) begin
-			Instruction_1 <= 32'd0;
-			PC4_1 <= PC4_1;
-			MemWr_1 <= 1'd0;
-		end
-		else begin
-			Instruction_1 <= Instruction_IF;
-			PC4_1 <= PC4_IF;
-			MemWr_1 <= MemWr_IF;
+		if(~load_use_hazard) begin
+			RegDst_1 <= RegDst_IF;
+			MemToReg_1 <= MemToReg_IF;
+			RegWr_1 <= RegWr_IF;
+			if(PCSrc_2==2'b01 && ALUOut_EX[0] && (PC_0[31]==1'b0 || PC4_2[31]==1'b1)) begin		//the branch\j from user cannot overwrite the core
+				Instruction_1 <= 32'd0;
+				PC4_1 <= PC4_2;			//since branch\j and interrupt may happen at the same time, so let $k0 = PC4 of branch\j
+				MemWr_1 <= 1'd0;		//this must be zero when branch\j happen
+			end
+			else if(PCSrc_ID[1]) begin
+				Instruction_1 <= 32'd0;
+				PC4_1 <= PC4_1;
+				MemWr_1 <= 1'd0;
+			end
+			else begin
+				Instruction_1 <= Instruction_IF;
+				PC4_1 <= PC4_IF;
+				MemWr_1 <= MemWr_IF;
+			end
 		end
 	end
 end
@@ -165,7 +169,8 @@ wire[31:0] DatabusB_ID;
 assign DatabusB_ID=(Rt_ID && RegWr_2 && Rd_2==Rt_ID)?ALUOut_EX:
 					(Rt_ID && RegWr_3 && Rd_3==Rt_ID)?DatabusC_MEM:
 					DatabusB_tempt;
-
+reg MemRd_2;
+assign load_use_hazard=(MemRd_2) && (Rd_2==Rs_ID || Rd_2==Rt_ID);	//load-use hazard
 	//
 wire[31:0] ALUIn1_ID;
 wire[31:0] ALUIn2_ID;
@@ -183,7 +188,7 @@ reg[31:0] DatabusB_2;
 reg[31:0] ImmExt_2;
 reg[5:0] ALUFun_2;
 reg[1:0] MemToReg_2;
-reg Sign_2,MemWr_2,MemRd_2;
+reg Sign_2,MemWr_2;
 always@(negedge reset or posedge clk) begin
 	if(~reset)begin
 		PCSrc_2 <= 2'd0;
@@ -201,31 +206,39 @@ always@(negedge reset or posedge clk) begin
 		MemRd_2 <= 1'd0;
 	end
 	else begin
-		ALUIn1_2 <= ALUIn1_ID;
-		ALUIn2_2 <= ALUIn2_ID;
-		DatabusB_2 <= DatabusB_ID;
-		ImmExt_2 <= ImmExt_ID;
-		ALUFun_2 <= ALUFun_ID;
-		RegWr_2 <= RegWr_1;
-		MemToReg_2 <= MemToReg_1;
-		Sign_2 <= Sign_ID;
-		MemRd_2 <= MemRd_ID;
-		if(PCSrc_2==2'b01 && ALUOut_EX[0]) begin
-			PC4_2 <= PC4_2;		//since branch\j and interrupt may happen at the same time
-			PCSrc_2 <= 2'b00;	//make this instruction not influence the former instruction
-			MemWr_2 <= 1'b0;	//make this instruction useless
-			Rd_2 <= (RegDst_1==2'b11)?5'd26:5'd0;
+		if(~load_use_hazard) begin
+			ALUIn1_2 <= ALUIn1_ID;
+			ALUIn2_2 <= ALUIn2_ID;
+			DatabusB_2 <= DatabusB_ID;
+			ImmExt_2 <= ImmExt_ID;
+			ALUFun_2 <= ALUFun_ID;
+			RegWr_2 <= RegWr_1;
+			MemToReg_2 <= MemToReg_1;
+			Sign_2 <= Sign_ID;
+			MemRd_2 <= MemRd_ID;
+			if(PCSrc_2==2'b01 && ALUOut_EX[0]) begin
+				PC4_2 <= PC4_2;		//since branch\j and interrupt may happen at the same time
+				PCSrc_2 <= 2'b00;	//make this instruction not influence the former instruction
+				MemWr_2 <= 1'b0;	//make this instruction useless
+				Rd_2 <= (RegDst_1==2'b11)?5'd26:5'd0;
+			end
+			else begin
+				PC4_2 <= PC4_1;
+				PCSrc_2 <= PCSrc_ID;
+				MemWr_2 <= MemWr_1;
+				case(RegDst_1)
+					2'b01:Rd_2<=Rt_ID;
+					2'b10:Rd_2<=5'd31;
+					2'b11:Rd_2<=5'd26;
+					default:Rd_2<=Rd_ID;
+				endcase
+			end
 		end
 		else begin
-			PC4_2 <= PC4_1;
-			PCSrc_2 <= PCSrc_ID;
-			MemWr_2 <= MemWr_1;
-			case(RegDst_1)
-				2'b01:Rd_2<=Rt_ID;
-				2'b10:Rd_2<=5'd31;
-				2'b11:Rd_2<=5'd26;
-				default:Rd_2<=Rd_ID;
-			endcase
+			PCSrc_2 <= 2'd0;
+			RegWr_2 <= 1'd0;
+			MemWr_2 <= 1'd0;
+			MemRd_2 <= 1'd0;
 		end
 	end
 end

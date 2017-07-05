@@ -15,15 +15,15 @@ assign reset=switch[0];
 //
 
 //Interrupt,Exception
-reg[31:0] PC_IF;
+reg[31:0] PC_0;
 wire Interrupt,Exception;
 
 wire timer,uart_send;
-assign Interrupt=(timer || uart_send) && (PC_IF[31]==0);
+assign Interrupt=(timer || uart_send) && (PC_0[31]==0);
 
 reg core_hazard;
 wire PC_overflow,ALU_overflow;
-assign Exception=(core_hazard || PC_overflow) && (PC_IF[31]==0);
+assign Exception=(core_hazard || PC_overflow) && (PC_0[31]==0);
 
 reg[2:0] led_exce;
 assign led[10]=led_exce[2];
@@ -52,24 +52,25 @@ wire[1:0] PCSrc_ID;
 wire[31:0] ConBA_EX;
 wire[31:0] ALUOut_EX;
 reg[1:0] PCSrc_2;
-assign PC_next=(PCSrc_2==2'b01 && ALUOut_EX[0])?ConBA_EX:
-				(PCSrc_ID==2'b10)?JT_ID:
+reg[31:0] PC4_2;
+assign PC_next=(PCSrc_2==2'b01 && ALUOut_EX[0] && (PC_0[31]==1'b0 || PC4_2[31]==1'b1))?ConBA_EX:		//the branch from user cannot overwrite the core
+				(PCSrc_ID==2'b10)?JT_ID:	//here j will not influence the interrupt process
 				(PCSrc_ID==2'b11)?DatabusA_ID:
 				PC4_IF;
 	//
 
 	//PC,core_hazard
-assign PC4_IF=PC_IF+4;
+assign PC4_IF=PC_0+4;
 always@(negedge reset or posedge clk) begin
 	if(~reset)begin
-		PC_IF<=0;
+		PC_0<=0;
 		core_hazard<=0;
 	end
 	else begin
-		PC_IF<=(Exception || (PC_next[31]==1 && PC_IF[31]==0))?32'h80000008:
+		PC_0<=(Exception || (PC_next[31]==1 && PC_0[31]==0))?32'h80000008:
 				(Interrupt)?32'h80000004:
 				PC_next;
-		core_hazard<=(PC_next[31]==1 && PC_IF[31]==0)?1:0;	//only as a warning
+		core_hazard<=(PC_next[31]==1 && PC_0[31]==0)?1:0;	//only as a warning
 	end
 end
 
@@ -78,7 +79,7 @@ end
 	//Instruction Memory
 wire[31:0] Instruction_tempt;
 wire[31:0] Instruction_IF;
-ROM instruction_memory(PC_IF[30:0],Instruction_tempt,PC_overflow);
+ROM instruction_memory(PC_0[30:0],Instruction_tempt,PC_overflow);
 assign Instruction_IF=(Interrupt||Exception)?32'd0:Instruction_tempt;	//to make the instruction useless, since branch\j may influence the former
 	//
 
@@ -91,7 +92,6 @@ CPU_Control_IF control_IF(Instruction_IF[31:26],Instruction_IF[5:0],Interrupt,Ex
 
 
 //	IF/ID
-reg[31:0] PC4_2;
 reg[31:0] Instruction_1;
 reg[31:0] PC4_1;
 reg[1:0] RegDst_1;
@@ -110,7 +110,7 @@ always@(negedge reset or posedge clk) begin
 		RegDst_1 <= RegDst_IF;
 		MemToReg_1 <= MemToReg_IF;
 		RegWr_1 <= RegWr_IF;
-		if(PCSrc_2==2'b01 && ALUOut_EX[0] && (PC_IF[31]==1'b0 || PC4_2[31]==1'b1)) begin		//the branch\j from user cannot overwrite the core
+		if(PCSrc_2==2'b01 && ALUOut_EX[0] && (PC_0[31]==1'b0 || PC4_2[31]==1'b1)) begin		//the branch\j from user cannot overwrite the core
 			Instruction_1 <= 32'd0;
 			PC4_1 <= PC4_2;			//since branch\j and interrupt may happen at the same time, so let $k0 = PC4 of branch\j
 			MemWr_1 <= 1'd0;		//this must be zero when branch\j happen

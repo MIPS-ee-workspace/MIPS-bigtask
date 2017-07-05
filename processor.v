@@ -29,7 +29,6 @@ reg[2:0] led_exce;
 assign led[10]=led_exce[2];
 assign led[9]=led_exce[1];
 assign led[8]=led_exce[0];
-
 always@(posedge sysclk or negedge reset) begin
 	if(~reset)begin
 		led_exce[2:0] <= 3'b000;
@@ -40,12 +39,12 @@ always@(posedge sysclk or negedge reset) begin
 		if(ALU_overflow) led_exce[0] <= 1'b1;
 	end
 end
-
 //
 
 
 //	preIF
 	//PC_next
+wire[31:0] PC_next;
 wire[31:0] PC4_IF;
 wire[31:0] JT_ID;
 wire[31:0] DatabusA_ID;
@@ -60,7 +59,6 @@ assign PC_next=(PCSrc_2==2'b01 && ALUOut_EX[0])?ConBA_EX:
 	//
 
 	//PC,core_hazard
-wire[31:0] PC_next;
 assign PC4_IF=PC_IF+4;
 always@(negedge reset or posedge clk) begin
 	if(~reset)begin
@@ -93,6 +91,7 @@ CPU_Control_IF control_IF(Instruction_IF[31:26],Instruction_IF[5:0],Interrupt,Ex
 
 
 //	IF/ID
+reg[31:0] PC4_2;
 reg[31:0] Instruction_1;
 reg[31:0] PC4_1;
 reg[1:0] RegDst_1;
@@ -150,20 +149,20 @@ CPU_Control_ID control_ID(Instruction_1[31:26],Instruction_1[5:0],PCSrc_ID,ALUSr
 	//
 
 	//Register File
-wire[4:0] AddrC;
+reg[4:0] Rd_3;
 reg[31:0] DatabusC_MEM;
 reg RegWr_3;
 wire[31:0] DatabusB_tempt;
 wire[31:0] DatabusA_tempt;
-RegFile register_file(reset,clk,Rs_ID,DatabusA_tempt,Rt_ID,DatabusB_tempt,RegWr_3,AddrC,DatabusC_MEM, uart_send);
+RegFile register_file(reset,clk,Rs_ID,DatabusA_tempt,Rt_ID,DatabusB_tempt,RegWr_3,Rd_3,DatabusC_MEM, uart_send);
 
-wire[31:0] forward_EX;
-assign forward_EX=(MemToReg_2[1])?PC4_2:ALUOut_EX;
-assign DatabusA_ID=(Rs_ID && RegWr_2 && Rd_2==Rs_ID)?forward_EX:	//forwarding: To make jr overwrite feasible, DatabusA must be changed in ID
+reg[4:0] Rd_2;
+reg RegWr_2;
+assign DatabusA_ID=(Rs_ID && RegWr_2 && Rd_2==Rs_ID)?ALUOut_EX:	//forwarding: To make jr overwrite feasible, DatabusA must be changed in ID
 					(Rs_ID && RegWr_3 && Rd_3==Rs_ID)?DatabusC_MEM:
 					DatabusA_tempt;
 wire[31:0] DatabusB_ID;
-assign DatabusB_ID=(Rt_ID && RegWr_2 && Rd_2==Rt_ID)?forward_EX:
+assign DatabusB_ID=(Rt_ID && RegWr_2 && Rd_2==Rt_ID)?ALUOut_EX:
 					(Rt_ID && RegWr_3 && Rd_3==Rt_ID)?DatabusC_MEM:
 					DatabusB_tempt;
 
@@ -178,15 +177,13 @@ assign Imm32=(LUOp)?{Imm16,16'h0000}:ImmExt_ID;
 assign ALUIn2_ID=(ALUSrc2)?Imm32:DatabusB_ID;
 
 //	ID/EX
-reg[31:0] PC4_2;
 reg[31:0] ALUIn1_2;
 reg[31:0] ALUIn2_2;
 reg[31:0] DatabusB_2;
 reg[31:0] ImmExt_2;
 reg[5:0] ALUFun_2;
 reg[1:0] MemToReg_2;
-reg[4:0] Rd_2;
-reg Sign_2,RegWr_2,MemWr_2,MemRd_2;
+reg Sign_2,MemWr_2,MemRd_2;
 always@(negedge reset or posedge clk) begin
 	if(~reset)begin
 		PCSrc_2 <= 2'd0;
@@ -247,7 +244,6 @@ reg[31:0] PC4_3;
 reg[31:0] ALUOut_3;
 reg[31:0] DatabusB_3;
 reg[1:0] MemToReg_3;
-reg[4:0] Rd_3;
 reg MemWr_3,MemRd_3;
 always@(negedge reset or posedge clk) begin
 	if(~reset)begin
@@ -278,7 +274,7 @@ wire[31:0] rdata1;
 wire[31:0] rdata2;
 wire[31:0] ReadData;
 wire MemRd1,MemRd2,MemWr1,MemWr2;
-assign {MemRd2,MemRd1,MemWr2,MemWr1}=(ALUOut < 32'h40000000)?{MemRd_3,1'b0,MemWr_3,1'b0}:{1'b0,MemRd_3,1'b0,MemWr_3};
+assign {MemRd2,MemRd1,MemWr2,MemWr1}=(ALUOut_3 < 32'h40000000)?{MemRd_3,1'b0,MemWr_3,1'b0}:{1'b0,MemRd_3,1'b0,MemWr_3};
 Peripheral peripheral(reset,sysclk,clk,MemRd1,MemWr1,ALUOut_3,DatabusB_3,rdata1, led[7:0],switch,digi,timer, UART_RX,UART_TX,uart_send);
 DataMem data_memory(reset,clk,MemRd2,MemWr2,ALUOut_3,DatabusB_3,rdata2);
 assign ReadData = rdata1 | rdata2;
@@ -291,8 +287,6 @@ begin
 		default:DatabusC_MEM <= PC4_3;
 	endcase
 end
-
-assign Addrc=Rd_3;
 	//
 //MEM
 

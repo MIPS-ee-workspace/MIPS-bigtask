@@ -5,14 +5,13 @@ module Processor(sysclk,clk,led,switch,digi,UART_RX,UART_TX);
 //set switch link
 
 input clk,sysclk,UART_RX;
-output [10:0] led;
+output [15:0] led;
 input [7:0] switch;
 output [11:0] digi;
 output UART_TX;
 
 wire reset;
 assign reset=switch[0];
-//
 
 //Interrupt,Exception
 reg[31:0] PC_0;
@@ -215,17 +214,18 @@ always@(negedge reset or posedge clk) begin
 			RegWr_2 <= RegWr_1;
 			MemToReg_2 <= MemToReg_1;
 			Sign_2 <= Sign_ID;
-			MemRd_2 <= MemRd_ID;
 			if(PCSrc_2==2'b01 && ALUOut_EX[0]) begin
 				PC4_2 <= PC4_2;		//since branch\j and interrupt may happen at the same time
 				PCSrc_2 <= 2'b00;	//make this instruction not influence the former instruction
 				MemWr_2 <= 1'b0;	//make this instruction useless
+				MemRd_2 <= 1'b0;
 				Rd_2 <= (RegDst_1==2'b11)?5'd26:5'd0;
 			end
 			else begin
 				PC4_2 <= PC4_1;
 				PCSrc_2 <= PCSrc_ID;
 				MemWr_2 <= MemWr_1;
+				MemRd_2 <= MemRd_ID;
 				case(RegDst_1)
 					2'b01:Rd_2<=Rt_ID;
 					2'b10:Rd_2<=5'd31;

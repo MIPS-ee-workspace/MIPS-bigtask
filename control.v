@@ -33,10 +33,10 @@ assign MemRd=(opcode==6'h23);//lw
 
 endmodule
 
-module CPU_Control_IF(opcode,Funct,Interrupt,Exception,PCSrc,RegDst,RegWr,MemWr,MemToReg);
+module CPU_Control_IF(opcode,Funct,Interrupt,Exception,RegDst,RegWr,MemWr,MemToReg);
 input[5:0] opcode,Funct;
 input Interrupt,Exception;
-output[1:0] RegDst, MemToReg, PCSrc;
+output[1:0] RegDst, MemToReg;
 output RegWr,MemWr;
 wire I,branch_temp;
 

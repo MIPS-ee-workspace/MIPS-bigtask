@@ -24,11 +24,13 @@ reg[7:0] UART_RXD;
 reg[7:0] UART_TXD;
 reg[4:0] UART_CON;
 assign uart_send=UART_CON[4];
+//assign led[4:0]=UART_CON;
 
 //timer + other display
 reg [31:0] TH,TL;
 reg [2:0] TCON;
 assign timer = TCON[2];
+//assign led[2:0] = TCON[2:0];
 
 always@(*) begin
 	if(rd) begin
@@ -96,7 +98,7 @@ baud_rate_generator baud(reset,sysclk,baud_x16);
 reg[7:0] rdata_state;
 reg receive_state;
 
-always@(posedge clk or negedge reset)
+always@(posedge sysclk or negedge reset)
 begin
 	if(~reset) begin
 		receive_state <= 1'b0;

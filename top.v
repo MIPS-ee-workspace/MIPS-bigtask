@@ -2,7 +2,7 @@ module top(sysclk,switch,UART_RX,led,digi,UART_TX);
 	input sysclk,UART_RX;
 	input[7:0] switch;
 	output UART_TX;
-	output[10:0] led;
+	output[15:0] led;
 	output[11:0] digi;
 
 	reg clk;
@@ -11,7 +11,7 @@ module top(sysclk,switch,UART_RX,led,digi,UART_TX);
 	begin
 		if(clk_state==0)
 			clk <= ~clk;
-		clk_state <= (clk_state==5)?0:clk_state+1;	//100M/9600/16=651.04
+		clk_state <= (clk_state==5)?0:clk_state+1;
 	end
 
 	wire[11:0] digi2;

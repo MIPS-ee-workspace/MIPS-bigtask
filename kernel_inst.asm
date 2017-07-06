@@ -24,6 +24,7 @@ j GCD
 
 UARTRead:
 lw $t0, 32($s0) # 0x40000020, UART_CON
+nop
 andi $t0, $t0, 8
 beq $t0, $0, UARTRead
 jr $ra
@@ -108,6 +109,7 @@ j UARTInterruptHandler
 
 ExceptionHandler:
 lw $s1, 16($s0)
+nop
 # $s1 = switch
 andi $s1, $s1, 2
 bne $s1, $0, Restore
@@ -173,6 +175,7 @@ sw $s2, 60($sp)
 
 BCDScan:
 lw $s2, 20($s0) # 0x40000014, BCD control
+nop
 andi $s2, $s2, 0x0f00
 # extract ano
 srl $s1, $s2, 9
@@ -219,6 +222,7 @@ sw $s1, 20($s0) # 0x40000014, BCD control
 DisableTCON:
 lw $s1, 8($s0)
 # $s1 = TCON
+nop
 ori $s1, $s1, 2
 # set TCON[1] = 1
 sw $s1, 8($s0)
@@ -226,9 +230,10 @@ j Restore
 
 UARTInterruptHandler:
 lw $s1, 32($s0) # UART_CON
+nop
 andi $s1, $s1, 4
 beq $s1, $0, UARTInterruptHandler
-lw $s1, 24($s0) # UART_TXD
+lw $s2, 24($s0) # UART_TXD
 addi $s1, $0, -2
 and $k1, $k1, $s1 # change $k1[0]
 j Restore

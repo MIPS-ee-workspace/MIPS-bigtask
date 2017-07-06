@@ -13,6 +13,7 @@ assign overflow=(addr[30:2] >= ROM_SIZE)?1:0;
 
 always@(*)
 begin
+
 ROM_DATA[0] <= 32'h08000003;
 ROM_DATA[1] <= 32'h08000023;
 ROM_DATA[2] <= 32'h0800002d;

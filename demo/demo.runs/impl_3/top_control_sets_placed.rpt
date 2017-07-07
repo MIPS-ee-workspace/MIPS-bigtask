@@ -1,0 +1,120 @@
+Copyright 1986-2015 Xilinx, Inc. All Rights Reserved.
+------------------------------------------------------------------------------------
+| Tool Version : Vivado v.2015.3 (win64) Build 1368829 Mon Sep 28 20:06:43 MDT 2015
+| Date         : Fri Jul 07 16:07:53 2017
+| Host         : D running 64-bit major release  (build 9200)
+| Command      : report_control_sets -verbose -file top_control_sets_placed.rpt
+| Design       : top
+| Device       : xc7a35t
+------------------------------------------------------------------------------------
+
+Control Set Information
+
+Table of Contents
+-----------------
+1. Summary
+2. Flip-Flop Distribution
+3. Detailed Control Set Information
+
+1. Summary
+----------
+
++-------------------------------------------------------------------+-------+
+|                               Status                              | Count |
++-------------------------------------------------------------------+-------+
+| Number of unique control sets                                     |    67 |
+| Minimum Number of register sites lost to control set restrictions |   156 |
++-------------------------------------------------------------------+-------+
+
+
+2. Flip-Flop Distribution
+-------------------------
+
++--------------+-----------------------+------------------------+-----------------+--------------+
+| Clock Enable | Synchronous Set/Reset | Asynchronous Set/Reset | Total Registers | Total Slices |
++--------------+-----------------------+------------------------+-----------------+--------------+
+| No           | No                    | No                     |              32 |           22 |
+| No           | No                    | Yes                    |             160 |           72 |
+| No           | Yes                   | No                     |               0 |            0 |
+| Yes          | No                    | No                     |               0 |            0 |
+| Yes          | No                    | Yes                    |            1356 |          626 |
+| Yes          | Yes                   | No                     |               0 |            0 |
++--------------+-----------------------+------------------------+-----------------+--------------+
+
+
+3. Detailed Control Set Information
+-----------------------------------
+
++-----------------------------------------------+-------------------------------------------------+-------------------------------------------------+------------------+----------------+
+|                  Clock Signal                 |                  Enable Signal                  |                 Set/Reset Signal                | Slice Load Count | Bel Load Count |
++-----------------------------------------------+-------------------------------------------------+-------------------------------------------------+------------------+----------------+
+|  sysclk_IBUF_BUFG                             |                                                 | processor/register_file/RF_DATA[31][31]_i_3_n_1 |                1 |              1 |
+|  sysclk_IBUF_BUFG                             | processor/PC_0[31]_i_1_n_1                      | processor/peripheral/UART_CON_reg[0]_0          |                1 |              1 |
+|  sysclk_IBUF_BUFG                             | processor/peripheral/led[7]_i_1_n_1             | processor/peripheral/UART_CON_reg[0]_0          |                1 |              1 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[1][31]_i_1_n_1  | processor/register_file/RF_DATA_reg[1][31]_0    |                1 |              1 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[8][31]_i_1_n_1  | processor/register_file/RF_DATA_reg[1][31]_0    |                2 |              2 |
+|  sysclk_IBUF_BUFG                             | processor/ALU_mod/shift/E[0]                    | processor/peripheral/baud/baud_state_reg[0]_0   |                1 |              2 |
+|  sysclk_IBUF_BUFG                             | processor/PC_0[31]_i_1_n_1                      | processor/peripheral/receive_state_reg_0        |                2 |              2 |
+|  sysclk_IBUF_BUFG                             | processor/ALU_mod/shift/PC4_1_reg[31]_0[0]      | processor/peripheral/baud/baud_state_reg[0]_0   |                2 |              2 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[14][31]_i_1_n_1 | processor/register_file/RF_DATA[22][25]_i_1_n_1 |                2 |              2 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[1][31]_i_1_n_1  | processor/register_file/RF_DATA[9][21]_i_1_n_1  |                4 |              6 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[22][31]_i_1_n_1 | processor/register_file/RF_DATA[30][21]_i_1_n_1 |                4 |              6 |
+|  sysclk_IBUF_BUFG                             | processor/peripheral/led[7]_i_1_n_1             | processor/peripheral/UART_TX_reg_0              |                3 |              7 |
+|  processor/peripheral/baud/rdata_state_reg[7] |                                                 | processor/peripheral/wdata_state[7]_i_2_n_1     |                4 |              8 |
+|  processor/peripheral/baud/rdata_state_reg[7] |                                                 | processor/peripheral/rdata_state[7]_i_2_n_1     |                4 |              8 |
+|  sysclk_IBUF_BUFG                             |                                                 | processor/peripheral/UART_TX_reg_0              |                3 |              8 |
+|  sysclk_IBUF_BUFG                             | processor/peripheral/UART_TXD                   | processor/peripheral/UART_TX_reg_0              |                4 |              8 |
+|  sysclk_IBUF_BUFG                             |                                                 | processor/peripheral/receive_state_reg_0        |                7 |             10 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[30][31]_i_1_n_1 | processor/register_file/RF_DATA[31][31]_i_3_n_1 |                5 |             10 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[9][31]_i_1_n_1  | processor/register_file/RF_DATA[17][17]_i_1_n_1 |                5 |             10 |
+|  sysclk_IBUF_BUFG                             |                                                 | processor/peripheral/baud/baud_state_reg[0]_0   |                6 |             11 |
+|  sysclk_IBUF_BUFG                             | processor/peripheral/digi[11]_i_1_n_1           | processor/peripheral/UART_CON_reg[0]_0          |                3 |             12 |
+|  sysclk_IBUF_BUFG                             | processor/PC_0[31]_i_1_n_1                      | processor/register_file/RF_DATA_reg[1][31]_0    |                5 |             12 |
+|  sysclk_IBUF_BUFG                             |                                                 | processor/register_file/RF_DATA_reg[1][31]_0    |                4 |             13 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[25][31]_i_1_n_1 | processor/register_file/RF_DATA[25][13]_i_1_n_1 |                6 |             14 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[17][31]_i_1_n_1 | processor/register_file/RF_DATA[25][13]_i_1_n_1 |                9 |             14 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[25][31]_i_1_n_1 | processor/register_file/RF_DATA[31][31]_i_3_n_1 |                7 |             18 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[17][31]_i_1_n_1 | processor/register_file/RF_DATA[17][17]_i_1_n_1 |               12 |             18 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[30][31]_i_1_n_1 | processor/register_file/RF_DATA[30][21]_i_1_n_1 |               17 |             22 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[9][31]_i_1_n_1  | processor/register_file/RF_DATA[9][21]_i_1_n_1  |               12 |             22 |
+|  sysclk_IBUF_BUFG                             |                                                 | processor/PC_0[1]_i_2_n_1                       |               10 |             23 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[1][31]_i_1_n_1  | processor/peripheral/UART_TX_reg_0              |                8 |             25 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[22][31]_i_1_n_1 | processor/register_file/RF_DATA[22][25]_i_1_n_1 |               15 |             26 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[14][31]_i_1_n_1 | processor/register_file/RF_DATA[14][29]_i_1_n_1 |               14 |             30 |
+|  sysclk_IBUF_BUFG                             | processor/ALU_mod/shift/PC4_1_reg[31]_0[0]      | processor/PC_0[1]_i_2_n_1                       |               11 |             30 |
+|  sysclk_IBUF_BUFG                             | processor/ALU_mod/shift/E[0]                    | processor/PC_0[1]_i_2_n_1                       |                8 |             30 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[8][31]_i_1_n_1  | processor/register_file/RF_DATA[14][29]_i_1_n_1 |               13 |             30 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/p_0_in[0]               | processor/register_file/RF_DATA[31][31]_i_3_n_1 |               12 |             31 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[16][31]_i_1_n_1 | processor/register_file/RF_DATA[22][25]_i_1_n_1 |               13 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[12][31]_i_1_n_1 | processor/register_file/RF_DATA[14][29]_i_1_n_1 |                8 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[18][31]_i_1_n_1 | processor/register_file/RF_DATA[22][25]_i_1_n_1 |               23 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[13][31]_i_1_n_1 | processor/register_file/RF_DATA[17][17]_i_1_n_1 |                7 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[15][31]_i_1_n_1 | processor/register_file/RF_DATA[17][17]_i_1_n_1 |               13 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[28][31]_i_1_n_1 | processor/register_file/RF_DATA[30][21]_i_1_n_1 |               13 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[10][31]_i_1_n_1 | processor/register_file/RF_DATA[14][29]_i_1_n_1 |                8 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA                 | processor/register_file/RF_DATA[31][31]_i_3_n_1 |               23 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[11][31]_i_1_n_1 | processor/register_file/RF_DATA[17][17]_i_1_n_1 |               10 |             32 |
+|  n_0_2215_BUFG                                |                                                 |                                                 |               22 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[19][31]_i_1_n_1 | processor/register_file/RF_DATA[25][13]_i_1_n_1 |               11 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[24][31]_i_1_n_1 | processor/register_file/RF_DATA[30][21]_i_1_n_1 |               13 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[21][31]_i_1_n_1 | processor/register_file/RF_DATA[25][13]_i_1_n_1 |               13 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[29][31]_i_1_n_1 | processor/register_file/RF_DATA[31][31]_i_3_n_1 |               17 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[26][31]_i_1_n_1 | processor/register_file/RF_DATA[30][21]_i_1_n_1 |               18 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/peripheral/TL[31]_i_1_n_1             | processor/peripheral/UART_TX_reg_0              |               18 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/peripheral/TH                         | processor/peripheral/UART_CON_reg[0]_0          |                9 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[5][31]_i_1_n_1  | processor/register_file/RF_DATA[9][21]_i_1_n_1  |               14 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[3][31]_i_1_n_1  | processor/register_file/RF_DATA[9][21]_i_1_n_1  |               13 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[6][31]_i_1_n_1  | processor/register_file/RF_DATA_reg[1][31]_0    |               20 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[23][31]_i_1_n_1 | processor/register_file/RF_DATA[25][13]_i_1_n_1 |               21 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[2][31]_i_1_n_1  | processor/register_file/RF_DATA_reg[1][31]_0    |               17 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[7][31]_i_1_n_1  | processor/register_file/RF_DATA[9][21]_i_1_n_1  |               20 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[4][31]_i_1_n_1  | processor/register_file/RF_DATA_reg[1][31]_0    |               14 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/register_file/RF_DATA[20][31]_i_1_n_1 | processor/register_file/RF_DATA[22][25]_i_1_n_1 |               14 |             32 |
+|  sysclk_IBUF_BUFG                             | processor/PC_0[31]_i_1_n_1                      | processor/PC_0[1]_i_2_n_1                       |               17 |             41 |
+|  sysclk_IBUF_BUFG                             | processor/PC_0[31]_i_1_n_1                      | processor/peripheral/UART_TX_reg_0              |               19 |             44 |
+|  sysclk_IBUF_BUFG                             |                                                 | processor/peripheral/UART_CON_reg[0]_0          |               33 |             78 |
+|  sysclk_IBUF_BUFG                             | processor/PC_0[31]_i_1_n_1                      | processor/peripheral/baud/baud_state_reg[0]_0   |               51 |            109 |
+|  sysclk_IBUF_BUFG                             | processor/data_memory/p_1_in                    |                                                 |               32 |            128 |
++-----------------------------------------------+-------------------------------------------------+-------------------------------------------------+------------------+----------------+
+
+
